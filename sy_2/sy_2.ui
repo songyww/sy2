@@ -30,7 +30,7 @@
       <x>0</x>
       <y>30</y>
       <width>101</width>
-      <height>401</height>
+      <height>421</height>
      </rect>
     </property>
    </widget>
@@ -40,7 +40,7 @@
       <x>100</x>
       <y>30</y>
       <width>581</width>
-      <height>401</height>
+      <height>421</height>
      </rect>
     </property>
    </widget>
@@ -60,7 +60,7 @@
       <x>750</x>
       <y>30</y>
       <width>101</width>
-      <height>411</height>
+      <height>421</height>
      </rect>
     </property>
    </widget>
@@ -70,7 +70,7 @@
       <x>850</x>
       <y>30</y>
       <width>581</width>
-      <height>411</height>
+      <height>421</height>
      </rect>
     </property>
    </widget>
@@ -78,8 +78,8 @@
     <property name="geometry" stdset="0">
      <rect>
       <x>0</x>
-      <y>440</y>
-      <width>671</width>
+      <y>470</y>
+      <width>681</width>
       <height>31</height>
      </rect>
     </property>
@@ -88,9 +88,9 @@
     <property name="geometry" stdset="0">
      <rect>
       <x>0</x>
-      <y>470</y>
-      <width>671</width>
-      <height>421</height>
+      <y>500</y>
+      <width>681</width>
+      <height>401</height>
      </rect>
     </property>
    </widget>
@@ -104,6 +104,21 @@
      <height>23</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>文件</string>
+    </property>
+    <addaction name="action"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>超大图像配准</string>
+    </property>
+    <addaction name="action_2"/>
+    <addaction name="action_3"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -114,6 +129,21 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="action">
+   <property name="text">
+    <string>打开</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>分块算法</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>快速算法</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
