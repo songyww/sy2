@@ -8,8 +8,44 @@
 /*****  ArcGIS 的头文件  *****/
 #include <ArcSDK.h>
 
+
+/******       QT 的头文件  *******/
+#include <QtGui/QMainWindow>
+#include "ui_sy_2.h"
+#include <qstring.h>
+#include <QtGui/QMessageBox>
+#include <QAction>
+#include <QMenuBar>
+#include <QStatusBar>
+#include <QUuid>
+#include <qmessagebox.h>
+#include <qfiledialog.h>
+#include <QTextCodec>///解决qt中文乱码时需要添加的头文件
+
+/*****  opencv的头文件  *****/
+#include <opencv2/opencv.hpp>
+#include <opencv2/legacy/legacy.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/nonfree/nonfree.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/imgproc/imgproc_c.h>
+#include <opencv2/legacy/compat.hpp>
+#include <cv.h>
+#include <highgui.h>
+#include <cxcore.h>
+
+/***  VC 的头文件 ***/
+#include <vector>
+
+/*****  SURF算法头文件 *****/
+#include "SURF.h"
+
 /*****使用CSrting时需要用到的头文件*****/
 #include <atlstr.h>
+
 
 /***自己编写的头文件***/
 #include "Pyramid_with_GDAL.h"
@@ -71,7 +107,7 @@ void BigMapRegistration(); ///大图配准
 
 void SURF_ON_TWO(string SrcReImagePath, string SrcSenImagePath, string DstImagePath );
 
-
+void Find_OverlapArea ( int ilayer );
 
 
 #endif // SY_2_H

@@ -29,8 +29,8 @@ CvSeq* objectKeypoints = 0, * objeceDescriptors = 0;  ///±£´æÍ¼ÏñµÄÌØÕ÷µã¼°ÃèÊöĞ
 CvSeq* imageKeypoints = 0, * imageDescriptors = 0;
 
 vector<int> ptpairs_befores; //´æ´¢ÌôÑ¡Ö®Ç°µÄÆ¥ÅäµÄÌØÕ÷µã¶Ô
-
-
+CvMat *OverLap1;
+CvMat *OverLap2;
 
 
 
@@ -332,37 +332,27 @@ void sy_2::BigMapRegistration()
 	resultImg.push_back(sImageResultPath);	//resultImg[1]£º²Ã¼ôÍ¼ÏñÅä×¼½á¹ûÂ·¾¶
 	resultImg.push_back(BigMapResult);		//resultImg[2]£º´óÍ¼Åä×¼½á¹û
 	
-	int i = 1;
-	string reImage,senImage,resuImage;//ÕâÈı¸öÁ¿·Ö±ğÓÃÓÚÁÙÊ±´æ´¢ÓÃÒÔÆ¥ÅäµÄÍ¼ÏñÂ·¾¶£¬²¢´«µİ¸øÍ¼ÏñÅä×¼µÄº¯Êı
-	for ( i; i ++ ; i < simage_repath.size())
-	{
-		IplImage * image = cvLoadImage(simage_repath[i].c_str());
-		//ÒÀ´Î¶ÔÔ­Í¼ºÍÆäÓà¸÷²ã½ğ×ÖËşµÄ´óĞ¡½øĞĞÅĞ¶Ï£»Ñ¡ÔñºÏÊÊµÄ²ã½øĞĞÆ¥Åä
-		if (image->width <= 1000 || image->height <= 1000)
-		{
-			reImage = simage_repath[i];
-			senImage = simage_senpath[i];
-			break;
-		}
+	int i = refLayer.size()-2;
+	string refImage,senImage;	//ÕâÈı¸öÁ¿·Ö±ğÓÃÓÚÁÙÊ±´æ´¢ÓÃÒÔÆ¥ÅäµÄÍ¼ÏñÂ·¾¶£¬²¢´«µİ¸øÍ¼ÏñÅä×¼µÄº¯Êı
 
-	}
-
-	SURF_ON_TWO(reImage,senImage,sImageResultPath);//µ÷È¡½ğ×ÖËşÖĞÏñËØÊıĞ¡ÓÚ1000µÄÍ¼Ïñ½øĞĞÆ¥Åä
-	
 	//Èç¹ûÇ°Ãæ¶Ô½ğ×ÖËş²ãÊı½øĞĞÁËÑ¡Ôñ£¬»òÕß¸Ä±ä£¬Õâ¸öº¯Êı¾ÍĞèÒªÄÜ¹»ÊÊÓ¦ÕâÖÖ¸Ä±ä
-	//Ê×ÏÈÓ¦¸Ã¶Ôi½øĞĞÅĞ¶Ï£¬µ±i=1Ê±£¬ÎŞĞè½øĞĞ²Ã¼ô£¬Ö±½Ó½øĞĞÆ¥Åä£¬
-	CvMat* H;
-	if (i == 1)
+	//Ê×ÏÈÓ¦¸Ã¶Ôi½øĞĞÅĞ¶Ï£¬µ±i=-1Ê±£¬±íÃ÷Ã»ÓĞ½ğ×ÖËş²ãÎŞĞè½øĞĞ²Ã¼ô£¬Ö±½Ó½øĞĞÆ¥Åä£¬
+	CvMat* H;//ÏÖÔÚÏÈ²»ÌÖÂÛÍ¼Ïñ´óĞ¡Ê±µÄÎÊÌâ£¬ÏÈ°Ñ´óÍ¼Åä×¼¸ø¸Ä½ø
+	if (i <= 0)
 	{
-		H = H_2[0];
-
+		refImage = refImg[1];
+		senImage = senImg[1];
 		//ÏÂÃæ½øĞĞµÄÊÇ¶ÔĞ¡Í¼µÄÆ¥Åä
-
-
-
+		SURF_ON_TWO(refImage,senImage,sImageResultPath);
+		H = H_2[0];
 	}
 	else
 	{
+		
+		refImage = senLayer[i];				//È¡³öµ¹ÊıµÚ¶ş²ãÍ¼Ïñ¡£ÒòÎª½ğ×ÖËş¶¥²ãÍ¼Ïñ´óĞ¡Îª512*512.
+		senImage = refLayer[i];				//
+		SURF_ON_TWO(refImage,senImage,sImageResultPath);//µ÷È¡½ğ×ÖËşÖĞÏñËØÊıĞ¡ÓÚ1000µÄÍ¼Ïñ½øĞĞÆ¥Åä
+
 		//Èôi²»µÈÓÚ1£¬ÔòËµÃ÷Òª¶Ô½ğ×ÖËşµÄÄ³Ò»²ãÍ¼Ïñ½øĞĞÅä×¼£¬Õâ¾ÍĞèÒª½øĞĞ²Ã¼ôÖØÆ¥ÅäµÈ²Ù×÷
 
 		Cut_Count_Overlap(i);//¶Ô½á¹ûÍ¼ÏñÖĞÆ¥ÅäÌØÕ÷½øĞĞÍ³¼Æ£¬²¢½«¸ĞĞËÈ¤ÇøÓò½øĞĞ²ÃÇĞ²¢±£´æ
@@ -1118,3 +1108,70 @@ void ImageCut(const char* pszSrcFile, const char* pszDstFile, int iStartX, int i
 
 }
 
+
+void Find_OverlapArea ( int ilayer )
+{
+	//¼ÆËã´ÓËõÂÔÍ¼µ½Ô­Í¼µÄËõĞ¡±¶Êı
+	int iscale = static_cast<int>(pow(2.0,ilayer+1));
+
+	rePoint.clear();	//²Î¿¼Í¼ÏñÖĞ²Ã¼ô³öÀ´µÄĞ¡Í¼×óÉÏ½ÇÔÚ²Î¿¼Í¼ÏñÖĞµÄ×ø±ê
+	senPoint.clear();	//´ıÅä×¼Í¼ÏñÖĞ²Ã¼ôµÄĞ¡Í¼×óÉÏ½ÇÔÚ´ıÅä×¼Í¼ÏñÖĞµÄ×ø±ê
+
+	//¸ø³ö²Ã¼ôÍ¼ÏñµÄÂ·¾¶
+	string Overlap1 = refImg[0] + "refImage_Overlap.jpg";
+	string Overlap2 = senImg[0] + "senImage_Overlap.jpg";
+	refImg.push_back(Overlap1);
+	senImg.push_back(Overlap2);
+
+	int image1_xsize,image1_ysize; ///¶¨Òå²Î¿¼Í¼Ïñ´óĞ¡ĞÅÏ¢
+	int image2_xsize,image2_ysize;//¶¨Òå´ıÅä×¼Í¼Ïñ´óĞ¡ĞÅÏ¢
+
+	CvMat* H;///ÓÃÓÚÁÙÊ±±£´æH¾ØÕó
+	H = H_2[0]; //½«µÚÒ»´ÎÅä×¼½á¹ûÖĞµÄH¾ØÕó´«µİ¹ıÀ´¡£//´Ë´¦Ò²¿ÉÒÔºóĞøÉè¼ÆÎªÒ»¸öº¯Êı´«µİµÄ²ÎÊı
+	double px, py; //´ıÅä×¼Í¼ÏñÏà¶ÔÓÚ²Î¿¼Í¼ÏñÆ½ÒÆµÄ¾àÀë£¬Ò²¿É×÷ÎªÖØµşÇøÓò×óÉÏ½Ç»òÕß×óÏÂ½ÇµÄ×ø±ê
+	double h1, h2, h3, h4;
+	double dx,dy;///¶¨ÒåÖØµşÇøÓòµÄ´óĞ¡
+	double hx,hy;///¶¨Òå·Ö¿éÍ³¼ÆÊ±£¬xºÍy·½ÏòÃ¿Ò»Ğ¡¿éµÄ´óĞ¡£»
+	px = cvmGet( H, 0, 2 );
+	py = cvmGet( H, 1, 2 );
+	h1 = abs(px) + 0.5;////ÎªÁËËÄÉáÎåÈëËùÒÔ¼ÓÉÏ0.5£¬ÕâÒ»µã»¹Ã»ÓĞÏëÃ÷°×
+	h2 = abs(py) + 0.5;///¹ÊÖØµşÇøÓò×óÉÏ½Ç»òÕß×óÏÂ½ÇµÄ×ø±ê¼´Îª£º(h1,h2)
+
+	///ÕâÀïĞèÒª»ñÈ¡Í¼ÏñµÄ´óĞ¡²ÎÊı
+	//ÏÈ»ñÈ¡²Î¿¼Í¼ÏñÕâ±ßµÄĞÅÏ¢
+	image1_xsize = img[0]->width;
+	image1_ysize = img[0]->height;
+
+	//ÔÙ»ñÈ¡´ıÅä×¼Í¼ÏñµÄĞÅÏ¢
+	image2_xsize = img[1]->width;
+	image2_ysize = img[1]->height;
+
+
+	//¼ÆËãÖØµşÇøÓòµÄ´óĞ¡
+	dx = image1_xsize - h1;
+	dy = image1_ysize - h2;
+	Mat overlap((int)dx,(int)dy,CV_8UC1);
+	Mat result;
+	
+
+	CvSeq *CurrentKeypoints = objectKeypoints;
+	vector<int>ptpairs = ptpairs_befores;
+	int num = ptpairs.size()/2;
+	CvSURFPoint* r1;
+
+	int image1_xsize,image1_ysize; ///¶¨Òå²Î¿¼Í¼Ïñ´óĞ¡ĞÅÏ¢
+	int image2_xsize,image2_ysize;//¶¨Òå´ıÅä×¼Í¼Ïñ´óĞ¡ĞÅÏ¢
+
+	for (int i = 0; i < ptpairs.size(); i++)
+	{
+		r1 = (CvSURFPoint*)cvGetSeqElem(CurrentKeypoints, ptpairs[i] );
+		cvmSet(overlap,r1->pt.x,r1->pt.y,1);
+		i++;
+	}
+
+	integral(overlap,result,1);
+
+
+
+
+}
