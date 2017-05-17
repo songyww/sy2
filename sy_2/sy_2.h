@@ -5,25 +5,17 @@
 #ifndef SY_2_H
 #define SY_2_H
 
-
 /*****  ArcGIS 的头文件  *****/
 #include <ArcSDK.h>
 
-/******       QT 的头文件  *******/
-#include <QtGui/QMainWindow>
-#include "ui_sy_2.h"
-#include <qstring.h>
-#include <QtGui/QMessageBox>
-#include <QAction>
-#include <QMenuBar>
-#include <QStatusBar>
-#include <QUuid>
-#include <qmessagebox.h>
-#include <qfiledialog.h>
-#include <QTextCodec>///解决qt中文乱码时需要添加的头文件
-
 /*****使用CSrting时需要用到的头文件*****/
 #include <atlstr.h>
+
+/***自己编写的头文件***/
+#include "Pyramid_with_GDAL.h"
+#include "process.h"
+#include "process_with_surf.h"
+
 
 class sy_2 : public QMainWindow
 {
@@ -59,7 +51,27 @@ public:
 	void AddMapToolBarCtr(IToolbarControlPtr pToolbar);//map
 
 
+public slots:
+	void OpenFile1();
+	void OpenFile2();
+	void Openbigresult();
+	void OpenResultFile1(string DstImagePath);
+	void BigMapRegistration(); ///大图配准
+
+
+
 
 };
+
+void Cut_Count_Overlap( int ilayer );  //通过小图匹配获取两图重叠区域，并对重叠区域进行分块统计特征点数量。
+
+void ImageCut(const char* pszSrcFile, const char* pszDstFile, int iStartX, int iStartY, int iSizeX, int iSizeY,const char* pszFormat);////对图像进行裁切
+
+void BigMapRegistration(); ///大图配准
+
+void SURF_ON_TWO(string SrcReImagePath, string SrcSenImagePath, string DstImagePath );
+
+
+
 
 #endif // SY_2_H

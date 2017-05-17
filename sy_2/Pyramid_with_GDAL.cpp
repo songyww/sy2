@@ -2,7 +2,7 @@
  *	@brief Pyramid类成员函数的实现
  */
 
-#include "Pyramid_Class.h"
+#include "Pyramid_with_GDAL.h"
 
 bool PyramidBase::CheckPyramid()
 {
@@ -141,8 +141,8 @@ void PyramidBase::ReadPyramidFile(int m, int n,  char * filepath)
 	/*
 	 *	@brief 设置输出文件的路径、投影信息、以及变换参数
 	 */
-	//sprintf(filepath,"%s%d%s%d%s",Path,m,"_",n,".tif");
-	sprintf(filepath,"%s%d%s%d%s",Path,m,"_",n,".jpg");
+	
+	sprintf(filepath,"%s%s%d%s%d%s",FilePath,"//",m,"_",n,".jpg");
 	const char* OutFilepath = filepath;
 	//PyramidLayer_Path[n] = filepath;	//将金字塔第n层图像路径传递给金字塔类中的保存金字塔层图像路径的成员变量，
 	
@@ -157,8 +157,8 @@ void PyramidBase::ReadPyramidFile(int m, int n,  char * filepath)
 	GByte *pabyData;//根据分的块的大小为该缓存分配相应的空间
 
 	//设置计算分块的数目；传入参数为m
-	nXBlocks = p_pow(2,m);//计算x方向分的块数
-	nYBlocks = nXBlocks;//xy方向分的快数一样多
+	nXBlocks = InPyramidBand->GetXSize()/4000;	//计算x方向分的块数
+	nYBlocks = InPyramidBand->GetYSize()/4000;	//xy方向分的快数一样多
 
 	for ( int i = 1; i <= iBandCount; i++ )
 	{
@@ -186,8 +186,8 @@ void PyramidBase::ReadPyramidFile(int m, int n,  char * filepath)
 }
 
 
-//保存单个波段的金字塔某一层的图像,m:第m个波段； n:第n层金字塔； filepath:保存金字塔图像路径
-void SaveSingleBand(int n, char *filepath )
+//保存单个波段的金字塔某一层的图像,； n:第n层金字塔； filepath:保存金字塔图像路径
+void PyramidBase::SaveSingleBand(int n, char *filepath )
 {
 
 	GDALAllRegister();
@@ -198,7 +198,7 @@ void SaveSingleBand(int n, char *filepath )
 	 *	@brief 设置输出文件的路径、投影信息、以及变换参数
 	 */
 	//sprintf(filepath,"%s%d%s%d%s",Path,m,"_",n,".tif");
-	sprintf(filepath,"%s%s%d%s",Path,"_",n,".jpg");
+	sprintf(filepath,"%s%s%d%s",LayerPath,"\\",n,".jpg");
 	const char* OutFilepath = filepath;
 	//PyramidLayer_Path[n] = filepath;	//将金字塔第n层图像路径传递给金字塔类中的保存金字塔层图像路径的成员变量，
 	

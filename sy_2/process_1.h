@@ -11,13 +11,25 @@
 //使用CString时需要用到的头文件
 #include <atlstr.h>
 #include <qstring.h>
+#include "Pyramid_with_GDAL.h"
 
 
 
-void OpenFile1();
-void OpenFile2();
+/******       QT 的头文件  *******/
+#include <qstring.h>
+#include <QtGui/QMessageBox>
+#include <QAction>
+#include <QMenuBar>
+#include <QStatusBar>
+#include <QUuid>
+#include <qmessagebox.h>
+#include <qfiledialog.h>
+#include <QTextCodec>///解决qt中文乱码时需要添加的头文件
 
 
+
+/*****  ArcGIS 的头文件  *****/
+#include <ArcSDK.h>
 
 
 #endif

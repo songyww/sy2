@@ -32,9 +32,9 @@ public:
 	
 	/*文件路径*/
 	const char *InFilePath;			//存储读入文件完整路径
-	const char *FilePath;			//存储读入文件所在文件夹的路径
 	const char *FileName;			//存数读入文件的名字
-
+	const char *FilePath;			//存储读入文件所在文件夹的路径
+	const char* LayerPath ;				//存储金字塔层图像所在文件夹路径
 	/*GDAL数据集*/
 	GDALDataset *InFile;			//存储读入的文件数据
 	int iBandCount,iOverViewCount;	//iBandCount存储波段数；iOverViewCount存储当前波段中金字塔层数
@@ -46,7 +46,7 @@ public:
 	GDALRasterBand *InPyramidBand;	// 图像第一个波段的某一层金字塔图像；用以后面读取某一层时的参数设置；
 	GDALDriverH hDriver ;			//获取图像驱动
 	const char* InFormat;			//输入图像的格式
-	const char* Path ;
+	
 	int iPixelNum, iTopNum, iCurNum;
 
 	char * PyramidLayer_Path[20];///用于保存金字塔n层图像的路径，其中图像的名字最后一个数字代表第几层
