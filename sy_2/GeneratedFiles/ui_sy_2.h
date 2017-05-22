@@ -110,9 +110,6 @@ public:
         menuBar->addAction(menu->menuAction());
         menuBar->addAction(menu_2->menuAction());
         menu->addAction(menu_3->menuAction());
-        menu->addAction(action_6);
-        menu_3->addAction(action_4);
-        menu_3->addAction(action_5);
         menu_2->addAction(action_2);
         menu_2->addAction(action_3);
 

@@ -36,6 +36,8 @@
 #include <cv.h>
 #include <highgui.h>
 #include <cxcore.h>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
 
 /***  VC 的头文件 ***/
 #include <vector>

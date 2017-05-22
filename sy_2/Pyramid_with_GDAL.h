@@ -65,12 +65,12 @@ public:
 
 
 	//保存单个波段的金字塔某一层的图像,m:第m个波段； n:第n层金字塔； filepath:保存金字塔图像路径
-	void SaveSingleBand(int n, char *filepath );
+	void SaveSingleBand(int n, char *filepath);//, GDALDataset *pInFile );
 
 
 	//该函数实现a的b次方
 	int p_pow(int a, int b);
-
+//
 };
 
 

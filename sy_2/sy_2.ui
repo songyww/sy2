@@ -112,11 +112,8 @@
      <property name="title">
       <string>打开</string>
      </property>
-     <addaction name="action_4"/>
-     <addaction name="action_5"/>
     </widget>
     <addaction name="menu_3"/>
-    <addaction name="action_6"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">

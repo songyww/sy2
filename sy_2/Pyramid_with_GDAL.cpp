@@ -176,7 +176,7 @@ void PyramidBase::ReadPyramidFile(int m, int n,  char * filepath)
 
 
 //保存单个波段的金字塔某一层的图像,； n:第n层金字塔； filepath:保存金字塔图像路径
-void PyramidBase::SaveSingleBand(int n, char *filepath )
+void PyramidBase::SaveSingleBand(int n, char *filepath)//,GDALDataset *pInFile)
 {
 
 	GDALAllRegister();
@@ -204,8 +204,8 @@ void PyramidBase::SaveSingleBand(int n, char *filepath )
 
 	InPyramidBand = InRasterBand->GetOverview(n);
 	//设置计算分块的数目；传入参数为m
-	nXBlocks = InPyramidBand->GetXSize()/4000;//如果图像尺寸大于4000,则按照最大是4000的块进行读写
-	nYBlocks = InPyramidBand->GetYSize()/4000;;//
+	nXBlocks = 2;//InPyramidBand->GetXSize()/4000;//如果图像尺寸大于4000,则按照最大是4000的块进行读写
+	nYBlocks = 2;//InPyramidBand->GetYSize()/4000;;//
 	
 	
 	GDALRasterBand* OutBand = OutFile->GetRasterBand(1);
