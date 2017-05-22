@@ -108,7 +108,15 @@
     <property name="title">
      <string>文件</string>
     </property>
-    <addaction name="action"/>
+    <widget class="QMenu" name="menu_3">
+     <property name="title">
+      <string>打开</string>
+     </property>
+     <addaction name="action_4"/>
+     <addaction name="action_5"/>
+    </widget>
+    <addaction name="menu_3"/>
+    <addaction name="action_6"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -129,11 +137,6 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="action">
-   <property name="text">
-    <string>打开</string>
-   </property>
-  </action>
   <action name="action_2">
    <property name="text">
     <string>分块算法</string>
@@ -142,6 +145,21 @@
   <action name="action_3">
    <property name="text">
     <string>快速算法</string>
+   </property>
+  </action>
+  <action name="action_4">
+   <property name="text">
+    <string>打开参考图像</string>
+   </property>
+  </action>
+  <action name="action_5">
+   <property name="text">
+    <string>打开待配准图像</string>
+   </property>
+  </action>
+  <action name="action_6">
+   <property name="text">
+    <string>清除数据</string>
    </property>
   </action>
  </widget>

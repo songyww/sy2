@@ -40,17 +40,6 @@ bool PyramidBase::CheckPyramid()
 		printf("图像已经创建金字塔！");
 		return TRUE;
 	}
-		
-	
-// 
-// 		//获取输入图像第一个波段的金字塔层数；用以后面判断是否有金字塔
-
-
-
-	//Cleanup
-	/*GDALClose(InFile);*/
-	
-
 }
 
 bool PyramidBase::CreatePyramid()
@@ -198,27 +187,29 @@ void PyramidBase::SaveSingleBand(int n, char *filepath )
 	 *	@brief 设置输出文件的路径、投影信息、以及变换参数
 	 */
 	//sprintf(filepath,"%s%d%s%d%s",Path,m,"_",n,".tif");
-	sprintf(filepath,"%s%s%d%s",LayerPath,"\\",n,".jpg");
+	sprintf(filepath,"%s%s%d%s",LayerPath,"/",n,".jpg");
 	const char* OutFilepath = filepath;
 	//PyramidLayer_Path[n] = filepath;	//将金字塔第n层图像路径传递给金字塔类中的保存金字塔层图像路径的成员变量，
 	
-	InPyramidBand = InRasterBand->GetOverview(n);			//InPyramidBand中存放输入图像第一个波段第n层金字塔；需要进行初始化
+	InPyramidBand = InRasterBand->GetOverview(n);//InPyramidBand->GetOverview(n);	//传入的参数n为读取那一层金字塔//InPyramidBand = InRasterBand->GetOverview(n);			//InPyramidBand中存放输入图像第一个波段第n层金字塔；需要进行初始化
 	GDALDataset* OutFile = poDriver->Create(OutFilepath, InPyramidBand->GetXSize(),InPyramidBand->GetYSize(),1, GDT_Byte, NULL ) ;
 	OutFile->SetProjection(InProjectionRef);
 	OutFile->SetGeoTransform(InGeotransform);
+
 
 	//分波段，分块读取文件
 	int nXBlocks, nYBlocks, nXBlockSize, nYBlockSize;//nXBlocks |nYBlocks ：XY反向分块的数目；nXBlockSize, nYBlockSize：分的块在xy方向上的大小
 	int iXBlock, iYBlock;
 	GByte *pabyData;//根据分的块的大小为该缓存分配相应的空间
 
+	InPyramidBand = InRasterBand->GetOverview(n);
 	//设置计算分块的数目；传入参数为m
 	nXBlocks = InPyramidBand->GetXSize()/4000;//如果图像尺寸大于4000,则按照最大是4000的块进行读写
 	nYBlocks = InPyramidBand->GetYSize()/4000;;//
 	
-	InPyramidBand = InPyramidBand->GetOverview(n);	//传入的参数n为读取那一层金字塔
+	
 	GDALRasterBand* OutBand = OutFile->GetRasterBand(1);
-	iOverViewCount = InPyramidBand->GetOverviewCount();
+	//iOverViewCount = InPyramidBand->GetOverviewCount();
 	CPLAssert( InPyramidBand->GetRasterDataType()  ==  GDT_Byte);
 	nYBlockSize = InPyramidBand->GetYSize() / nYBlocks;
 	nXBlockSize = InPyramidBand->GetXSize() / nXBlocks;

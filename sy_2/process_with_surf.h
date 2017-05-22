@@ -6,7 +6,7 @@
 #define PROCESS_WITH_SURF
 /******       QT 的头文件  *******/
 #include <QtGui/QMainWindow>
-#include "ui_sy_1.h"
+#include "ui_sy_2.h"
 #include <qstring.h>
 #include <QtGui/QMessageBox>
 #include <QAction>

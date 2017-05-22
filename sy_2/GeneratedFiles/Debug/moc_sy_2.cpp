@@ -22,26 +22,43 @@ static const uint qt_meta_data_sy_2[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       0,    0, // methods
+       5,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
        0,       // signalCount
 
+ // slots: signature, parameters, type, tag, flags
+       6,    5,    5,    5, 0x0a,
+      18,    5,    5,    5, 0x0a,
+      43,   30,    5,    5, 0x0a,
+      67,    5,    5,    5, 0x0a,
+      88,    5,    5,    5, 0x0a,
+
        0        // eod
 };
 
 static const char qt_meta_stringdata_sy_2[] = {
-    "sy_2\0"
+    "sy_2\0\0OpenFile1()\0OpenFile2()\0"
+    "DstImagePath\0OpenResultFile1(string)\0"
+    "BigMapRegistration()\0OnClearMapLayer()\0"
 };
 
 void sy_2::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    Q_UNUSED(_o);
-    Q_UNUSED(_id);
-    Q_UNUSED(_c);
-    Q_UNUSED(_a);
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        sy_2 *_t = static_cast<sy_2 *>(_o);
+        switch (_id) {
+        case 0: _t->OpenFile1(); break;
+        case 1: _t->OpenFile2(); break;
+        case 2: _t->OpenResultFile1((*reinterpret_cast< string(*)>(_a[1]))); break;
+        case 3: _t->BigMapRegistration(); break;
+        case 4: _t->OnClearMapLayer(); break;
+        default: ;
+        }
+    }
 }
 
 const QMetaObjectExtraData sy_2::staticMetaObjectExtraData = {
@@ -75,6 +92,11 @@ int sy_2::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     _id = QMainWindow::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 5)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 5;
+    }
     return _id;
 }
 QT_END_MOC_NAMESPACE

@@ -90,11 +90,16 @@ public:
 public slots:
 	void OpenFile1();
 	void OpenFile2();
-	void Openbigresult();
+	//void Openbigresult();
 	void OpenResultFile1(string DstImagePath);
 	void BigMapRegistration(); ///´óÍ¼Åä×¼
+	void OnClearMapLayer();//¸Ãº¯ÊıÓÃÓÚÇå³ıMap¿Ø¼şÖĞµÄÍ¼Ïñ£¬ÒÔ±ãÓÚÏÔÊ¾ÆäËûÍ¼Ïñ
 
-
+private:
+	QAction *openAction1,*openAction2;
+	QAction *SurfAction;
+	QAction *DeleMapLayersAction;
+//	QAction *openBigMapResult;
 
 
 };
@@ -103,7 +108,7 @@ void Cut_Count_Overlap( int ilayer );  //Í¨¹ıĞ¡Í¼Æ¥Åä»ñÈ¡Á½Í¼ÖØµşÇøÓò£¬²¢¶ÔÖØµşÇ
 
 void ImageCut(const char* pszSrcFile, const char* pszDstFile, int iStartX, int iStartY, int iSizeX, int iSizeY,const char* pszFormat);////¶ÔÍ¼Ïñ½øĞĞ²ÃÇĞ
 
-void BigMapRegistration(); ///´óÍ¼Åä×¼
+//void BigMapRegistration(); ///´óÍ¼Åä×¼
 
 void SURF_ON_TWO(string SrcReImagePath, string SrcSenImagePath, string DstImagePath );
 
