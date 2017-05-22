@@ -14,12 +14,17 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QGridLayout>
+#include <QtGui/QGroupBox>
 #include <QtGui/QHeaderView>
+#include <QtGui/QLabel>
+#include <QtGui/QLineEdit>
 #include <QtGui/QMainWindow>
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
 #include <QtGui/QStatusBar>
 #include <QtGui/QToolBar>
+#include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -41,6 +46,20 @@ public:
     QAxWidget *MapCtr2;
     QAxWidget *MapToolBarCtr4;
     QAxWidget *MapCtr4;
+    QGroupBox *groupBox;
+    QGridLayout *gridLayout;
+    QVBoxLayout *verticalLayout;
+    QLabel *label_3;
+    QLabel *label_4;
+    QLabel *label_5;
+    QLabel *label;
+    QLabel *label_2;
+    QVBoxLayout *verticalLayout_2;
+    QLineEdit *refImageSize;
+    QLineEdit *senImageSize;
+    QLineEdit *ptpairsnum;
+    QLineEdit *registratetime;
+    QLineEdit *mse;
     QMenuBar *menuBar;
     QMenu *menu;
     QMenu *menu_3;
@@ -89,6 +108,75 @@ public:
         MapCtr4 = new QAxWidget(centralWidget);
         MapCtr4->setObjectName(QString::fromUtf8("MapCtr4"));
         MapCtr4->setProperty("geometry", QVariant(QRect(0, 500, 681, 401)));
+        groupBox = new QGroupBox(centralWidget);
+        groupBox->setObjectName(QString::fromUtf8("groupBox"));
+        groupBox->setGeometry(QRect(730, 500, 251, 231));
+        gridLayout = new QGridLayout(groupBox);
+        gridLayout->setSpacing(6);
+        gridLayout->setContentsMargins(11, 11, 11, 11);
+        gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+        verticalLayout = new QVBoxLayout();
+        verticalLayout->setSpacing(6);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        label_3 = new QLabel(groupBox);
+        label_3->setObjectName(QString::fromUtf8("label_3"));
+
+        verticalLayout->addWidget(label_3);
+
+        label_4 = new QLabel(groupBox);
+        label_4->setObjectName(QString::fromUtf8("label_4"));
+
+        verticalLayout->addWidget(label_4);
+
+        label_5 = new QLabel(groupBox);
+        label_5->setObjectName(QString::fromUtf8("label_5"));
+
+        verticalLayout->addWidget(label_5);
+
+        label = new QLabel(groupBox);
+        label->setObjectName(QString::fromUtf8("label"));
+
+        verticalLayout->addWidget(label);
+
+        label_2 = new QLabel(groupBox);
+        label_2->setObjectName(QString::fromUtf8("label_2"));
+
+        verticalLayout->addWidget(label_2);
+
+
+        gridLayout->addLayout(verticalLayout, 0, 0, 1, 1);
+
+        verticalLayout_2 = new QVBoxLayout();
+        verticalLayout_2->setSpacing(6);
+        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+        refImageSize = new QLineEdit(groupBox);
+        refImageSize->setObjectName(QString::fromUtf8("refImageSize"));
+
+        verticalLayout_2->addWidget(refImageSize);
+
+        senImageSize = new QLineEdit(groupBox);
+        senImageSize->setObjectName(QString::fromUtf8("senImageSize"));
+
+        verticalLayout_2->addWidget(senImageSize);
+
+        ptpairsnum = new QLineEdit(groupBox);
+        ptpairsnum->setObjectName(QString::fromUtf8("ptpairsnum"));
+
+        verticalLayout_2->addWidget(ptpairsnum);
+
+        registratetime = new QLineEdit(groupBox);
+        registratetime->setObjectName(QString::fromUtf8("registratetime"));
+
+        verticalLayout_2->addWidget(registratetime);
+
+        mse = new QLineEdit(groupBox);
+        mse->setObjectName(QString::fromUtf8("mse"));
+
+        verticalLayout_2->addWidget(mse);
+
+
+        gridLayout->addLayout(verticalLayout_2, 0, 1, 1, 1);
+
         sy_2Class->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(sy_2Class);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
@@ -110,8 +198,6 @@ public:
         menuBar->addAction(menu->menuAction());
         menuBar->addAction(menu_2->menuAction());
         menu->addAction(menu_3->menuAction());
-        menu_2->addAction(action_2);
-        menu_2->addAction(action_3);
 
         retranslateUi(sy_2Class);
 
@@ -126,6 +212,12 @@ public:
         action_4->setText(QApplication::translate("sy_2Class", "\346\211\223\345\274\200\345\217\202\350\200\203\345\233\276\345\203\217", 0, QApplication::UnicodeUTF8));
         action_5->setText(QApplication::translate("sy_2Class", "\346\211\223\345\274\200\345\276\205\351\205\215\345\207\206\345\233\276\345\203\217", 0, QApplication::UnicodeUTF8));
         action_6->setText(QApplication::translate("sy_2Class", "\346\270\205\351\231\244\346\225\260\346\215\256", 0, QApplication::UnicodeUTF8));
+        groupBox->setTitle(QApplication::translate("sy_2Class", "\345\244\247\345\271\205\351\235\242\345\233\276\345\203\217\345\214\271\351\205\215", 0, QApplication::UnicodeUTF8));
+        label_3->setText(QApplication::translate("sy_2Class", "\345\217\202\350\200\203\345\233\276\345\203\217\345\260\272\345\257\270", 0, QApplication::UnicodeUTF8));
+        label_4->setText(QApplication::translate("sy_2Class", "\345\276\205\351\205\215\345\207\206\345\233\276\345\203\217\345\260\272\345\257\270", 0, QApplication::UnicodeUTF8));
+        label_5->setText(QApplication::translate("sy_2Class", "\345\214\271\351\205\215\347\202\271\345\257\271", 0, QApplication::UnicodeUTF8));
+        label->setText(QApplication::translate("sy_2Class", "\347\256\227\346\263\225\346\227\266\351\227\264", 0, QApplication::UnicodeUTF8));
+        label_2->setText(QApplication::translate("sy_2Class", "\347\256\227\346\263\225\347\262\276\345\272\246", 0, QApplication::UnicodeUTF8));
         menu->setTitle(QApplication::translate("sy_2Class", "\346\226\207\344\273\266", 0, QApplication::UnicodeUTF8));
         menu_3->setTitle(QApplication::translate("sy_2Class", "\346\211\223\345\274\200", 0, QApplication::UnicodeUTF8));
         menu_2->setTitle(QApplication::translate("sy_2Class", "\350\266\205\345\244\247\345\233\276\345\203\217\351\205\215\345\207\206", 0, QApplication::UnicodeUTF8));

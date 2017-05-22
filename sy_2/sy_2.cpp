@@ -347,8 +347,7 @@ void sy_2::OpenFile2()
 //大图配准
 void sy_2::BigMapRegistration()
 {
-	double t=(double)cvGetTickCount();//开始计时
-	double t3=(double)cvGetTickCount();//开始计时
+	
 	//*创建结果图像所在文件夹*//
 	string dir = refImg[0] + "BigMapResultFiles"; ///在参考图像文件夹下创建文件夹，保存小图和大图的配准结果
 	if(_access(dir.c_str(), 0) != -1)  
@@ -374,6 +373,9 @@ void sy_2::BigMapRegistration()
 	int i = refLayer.size()-2;
 	string refImage,senImage;	//这三个量分别用于临时存储用以匹配的图像路径，并传递给图像配准的函数
 
+	double t=(double)cvGetTickCount();//开始计时
+//	double t3=(double)cvGetTickCount();//开始计时
+
 	//如果前面对金字塔层数进行了选择，或者改变，这个函数就需要能够适应这种改变
 	//首先应该对i进行判断，当i=-1时，表明没有金字塔层无需进行裁剪，直接进行匹配，
 	CvMat* H;//现在先不讨论图像大小时的问题，先把大图配准给改进
@@ -389,9 +391,13 @@ void sy_2::BigMapRegistration()
 	{
 		
 		refImage = refLayer[i];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
-		senImage = senLayer[i];				//
+		senImage = senLayer[i];		
+		//
+//		double t4=(double)cvGetTickCount();//开始计时
+		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		SURF_ON_TWO(refImage,senImage,sImageResultPath);//调取金字塔中像素数小于1000的图像进行匹配
-
+		//double t4=(double)cvGetTickCount();//开始计时
+//		t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		//若i不等于1，则说明要对金字塔的某一层图像进行配准，这就需要进行裁剪重匹配等操作
 
 		Find_OverlapArea(i);//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
@@ -404,8 +410,10 @@ void sy_2::BigMapRegistration()
 		string OverlapImage1 = refImg[2];
 		string OverlapImage2 = senImg[2];
 		string OverlapResult = refImg[0] + "OverLapResultImage.jpg";
+//		double t5=(double)cvGetTickCount();//开始计时
+		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		SURF_ON_TWO(OverlapImage1,OverlapImage2,OverlapResult); //该函数进行完毕后，在H_2[0]中保存的是当前图像间变换后的H矩阵
-		//	t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+//		t5=(double)(cvGetTickCount()-t5)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		//Cut_Count_Overlap();//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
 		//下面从变换后的H矩阵中提取变换参数，用以对大图进行变换
 		H = H_2[0];
@@ -510,7 +518,7 @@ void sy_2::BigMapRegistration()
 
 				delete(pDataBuff2);
 
-				t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+//				t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 
 			}
 			else
@@ -530,14 +538,16 @@ void sy_2::BigMapRegistration()
 
 	}
 
-	//QString s1 = QString::number(t2,'g',6);
-	//ui.bigmaptime->setText(s1);
-	//QString mse = QString::number(mese2,'g',6);
-	//ui.bigmapmse->setText(mse);
-	//QString s2 = QString::number(t3,'g',6);
-	//ui.bigmaptime2->setText(s2);
-
-
+	QString s1 = QString::number(t,'g',6);
+	ui.registratetime->setText(s1);
+	QString mse2 = QString::number(mese2,'g',6);
+	ui.mse->setText(mse2);
+	QString s2 = QString::number(num2,'g',6);
+	ui.ptpairsnum->setText(s2);
+	//QString size1 = QString::number(t3,'g',6);
+	//ui.refImageSize->setText(size1);
+	//QString size2 = QString::number(t3,'g',6);
+	//ui.senImageSize->setText(size2);
 
 	OpenResultFile1(resultImg[2]);
 }
@@ -760,14 +770,14 @@ void Find_OverlapArea ( int ilayer )
 	//先获取参考图像这边的信息
 	image1_xsize = img[0]->width;
 	image1_ysize = img[0]->height;
-	cvShowImage("img[0]",img[0]);
-	cvWaitKey(0);
+//	cvShowImage("img[0]",img[0]);
+//	cvWaitKey(0);
 
 	//再获取待配准图像的信息
 	image2_xsize = img[1]->width;
 	image2_ysize = img[1]->height;
-	cvShowImage("img[1]",img[1]);
-	cvWaitKey(0);
+//	cvShowImage("img[1]",img[1]);
+//	cvWaitKey(0);
 
 	//计算重叠区域的大小
 	dx = image1_xsize - h1;
@@ -800,22 +810,28 @@ void Find_OverlapArea ( int ilayer )
 		flax = r1->pt.x;
 		flay = r1->pt.y;
 		overlap.at<char>(flay,flax)=1;
-		cvCircle(img[1],r11,3,cvScalar(0,255,255),-1,8);
+	//	cvCircle(img[1],r11,3,cvScalar(0,255,255),-1,8);
 		i++;
 		//参考图像img[0]
-		r2 = (CvSURFPoint*)cvGetSeqElem(objectKeypoints, ptpairs_befores[i] );
+	//	r2 = (CvSURFPoint*)cvGetSeqElem(objectKeypoints, ptpairs_befores[i] );
 		//cvmSet(overlap,r1->pt.x,r1->pt.y,1);
 		//	fla = r1->pt;
-		r22.x = r2->pt.x;
-		r22.y = r2->pt.y;
-		cvCircle(img[0],r22,3,cvScalar(0,255,255),-1,8);
+	//	r22.x = r2->pt.x;
+	//	r22.y = r2->pt.y;
+//		cvCircle(img[0],r22,3,cvScalar(0,255,255),-1,8);
 		
 	}
-	cvShowImage("img[0]",img[0]);
-	cvShowImage("img[1]",img[1]);
-	cvWaitKey(0);
+//	cvShowImage("img[0]",img[0]);
+//	cvShowImage("img[1]",img[1]);
+//	cvWaitKey(0);
+	//t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+
+//	double t4=(double)cvGetTickCount();//开始计时
  	boxFilter(overlap,result,-1,Size(sdx,sdy),cv::Point(-1,-1),false);
 	minMaxLoc(result,&tmpCountMinVal,&tmpCountMaxVal,&minPointt,&maxPoint);
+	//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+
+	//	double t4=(double)cvGetTickCount();//开始计时
 	CvPoint2D64f point1,point2;
 	point1.x = iscale*(maxPoint.x-sdx/2);//计算待配准裁切图像1左上角在参考图像上的位置
 	point1.y = iscale*(maxPoint.y-sdy/2);
@@ -825,17 +841,21 @@ void Find_OverlapArea ( int ilayer )
 	senPoint.push_back(point1);
 
 	////画出重叠区域的矩形框
-	cvRectangle(img[0],cvPoint(maxPoint.x-sdx/2+h1,maxPoint.y-sdy/2+h2),cvPoint(maxPoint.x+sdx/2+h1,maxPoint.y+sdy/2+h2),cvScalar(0,0,255),3,4,0 );
+//	cvRectangle(img[0],cvPoint(maxPoint.x-sdx/2+h1,maxPoint.y-sdy/2+h2),cvPoint(maxPoint.x+sdx/2+h1,maxPoint.y+sdy/2+h2),cvScalar(0,0,255),3,4,0 );
 	
-	cvRectangle(img[1],cvPoint(maxPoint.x-sdx/2,maxPoint.y-sdy/2),cvPoint(maxPoint.x+sdx/2,maxPoint.y+sdy/2),cvScalar(0,255,255),2,4,0 );
+//	cvRectangle(img[1],cvPoint(maxPoint.x-sdx/2,maxPoint.y-sdy/2),cvPoint(maxPoint.x+sdx/2,maxPoint.y+sdy/2),cvScalar(0,255,255),2,4,0 );
 	
+
+	//double t4=(double)cvGetTickCount();//开始计时
 	ImageCut(refImg[1].c_str(),Overlap1.c_str(),point2.x,point2.y,iscale*sdx,iscale*sdy,"GTiff");
 	ImageCut(senImg[1].c_str(),Overlap2.c_str(),point1.x,point1.y,iscale*sdx,iscale*sdy,"GTiff");
+	//double t4=(double)cvGetTickCount();//开始计时
+	//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 	//ImageCut(senImg[1].c_str(),Overlap2.c_str(),point2.x-iscale*h1,point2.y,iscale*sdx,iscale*sdy,"GTiff");
 //	cvNamedWindow("OverLapArea",CV_WINDOW_AUTOSIZE);
-	cvShowImage("img[0]WithOverLapArea",img[0]);
-	cvShowImage("img[1]CutOverLapArea",img[1]);
-	cvWaitKey(0);
+//	cvShowImage("img[0]WithOverLapArea",img[0]);
+//	cvShowImage("img[1]CutOverLapArea",img[1]);
+//	cvWaitKey(0);
 
 }
 
