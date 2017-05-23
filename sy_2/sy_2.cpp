@@ -390,8 +390,8 @@ void sy_2::BigMapRegistration()
 	else
 	{
 		
-		refImage = refLayer[i];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
-		senImage = senLayer[i];		
+		refImage = refLayer[i+1];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
+		senImage = senLayer[i+1];		
 		//
 //		double t4=(double)cvGetTickCount();//开始计时
 		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
@@ -400,7 +400,7 @@ void sy_2::BigMapRegistration()
 //		t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		//若i不等于1，则说明要对金字塔的某一层图像进行配准，这就需要进行裁剪重匹配等操作
 
-		Find_OverlapArea(i);//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
+		Find_OverlapArea(i+1);//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
 
 		//t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 
@@ -782,8 +782,8 @@ void Find_OverlapArea ( int ilayer )
 	//计算重叠区域的大小
 	dx = image1_xsize - h1;
 	dy = image1_ysize - h2;
-	int sdx = dx/3;
-	int sdy = dy/3;
+	int sdx = dx/4;
+	int sdy = dy/4;
 	Mat overlap = Mat::zeros((int)image2_ysize,(int)image2_xsize,CV_8UC1);
 	Mat result;
 	
