@@ -47,6 +47,9 @@ public:
 	GDALDriverH hDriver ;			//获取图像驱动
 	const char* InFormat;			//输入图像的格式
 	
+	//int iwidth;//保存图像width
+	//int iheight;//保存图像height
+
 	int iPixelNum, iTopNum, iCurNum;
 
 	char * PyramidLayer_Path[20];///用于保存金字塔n层图像的路径，其中图像的名字最后一个数字代表第几层

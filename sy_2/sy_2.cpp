@@ -15,7 +15,8 @@ vector<string> resultImg;
 /*** 保存金字塔文件路径 ***/
 vector<string> refLayer;
 vector<string> senLayer;
-
+//vector<char*> iImageSize;//refImageSize[0]=参考图像尺寸; refImageSize[1] = 待配准图像尺寸
+//vector<char*> senImageSize;//senImageSize[0]=width; senImageSize[1] = height
 
 //*** SURF算法中相关的全局变量 ***//
 vector<CvPoint2D64f> rePoint;
@@ -113,6 +114,7 @@ sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 	ui.menu_2->addAction(SurfAction);
 	ui.menu->addAction(DeleMapLayersAction);
 
+
 }
 
 sy_2::~sy_2()
@@ -187,6 +189,11 @@ void sy_2::OpenFile1()
 	pyramid1.FilePath = reImg_path.c_str();		//参考图像所在文件夹路径
 	pyramid1.CheckPyramid();
 	refLayer.clear();
+	char rsize[1024];
+	sprintf(rsize,"%d*%d",pyramid1.iWidth,pyramid1.iHeight);
+	QString rsize1 = QString::fromUtf8(rsize);
+	ui.refImageSize->setText(rsize1);
+	
 
 	char dir[1024];
 	sprintf(dir,"%s%s",pyramid1.FilePath,"refPyramidLayers");//filepath:金字塔层所在文件夹
@@ -264,6 +271,11 @@ void sy_2::OpenFile2()
 	pyramid2.InFilePath = sen_full.c_str();	//待配准图像完整路径
 	pyramid2.FilePath = sen_path.c_str();	//待配准图像文件夹路径
 	pyramid2.CheckPyramid();
+	char rsize[1024];
+	sprintf(rsize,"%d*%d",pyramid2.iWidth,pyramid2.iHeight);
+	QString rsize2 = QString::fromUtf8(rsize);
+	ui.senImageSize->setText(rsize2);
+
 
 	char dir[1024];
 	sprintf(dir,"%s%s",pyramid2.FilePath,"senPyramidLayers");//filepath:金字塔层所在文件夹
@@ -784,7 +796,7 @@ void Find_OverlapArea ( int ilayer )
 	dy = image1_ysize - h2;
 	int sdx = dx/4;
 	int sdy = dy/4;
-	Mat overlap = Mat::zeros((int)image2_ysize,(int)image2_xsize,CV_8UC1);
+	Mat overlap = Mat::zeros((int)dy,(int)dx,CV_8UC1);
 	Mat result;
 	
 
@@ -829,7 +841,7 @@ void Find_OverlapArea ( int ilayer )
 //	double t4=(double)cvGetTickCount();//开始计时
  	boxFilter(overlap,result,-1,Size(sdx,sdy),cv::Point(-1,-1),false);
 	minMaxLoc(result,&tmpCountMinVal,&tmpCountMaxVal,&minPointt,&maxPoint);
-	//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+//	t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 
 	//	double t4=(double)cvGetTickCount();//开始计时
 	CvPoint2D64f point1,point2;
@@ -876,12 +888,16 @@ void sy_2::OnClearMapLayer()
 		}
 		img.clear();
 	}
-	//ui.bigmapmse->clear();
-	//ui.bigmaptime->clear();
-//	ui.bigmaptime2->clear();
+	ui.mse->clear();
+	ui.registratetime->clear();
+	ui.ptpairsnum->clear();
+	ui.refImageSize->clear();
+	ui.senImageSize->clear();
 	refImg.clear();
 	senImg.clear();///分别保存用于初次匹配的小图的路径
 	resultImg.clear();
 	rePoint.clear();
 	senPoint.clear();
+	refLayer.clear();
+	senLayer.clear();
 }
