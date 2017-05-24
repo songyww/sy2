@@ -15,6 +15,8 @@ vector<string> resultImg;
 /*** 保存金字塔文件路径 ***/
 vector<string> refLayer;
 vector<string> senLayer;
+vector<string> refOverlap;
+vector<string> senOverlap;
 //vector<char*> iImageSize;//refImageSize[0]=参考图像尺寸; refImageSize[1] = 待配准图像尺寸
 //vector<char*> senImageSize;//senImageSize[0]=width; senImageSize[1] = height
 
@@ -97,14 +99,18 @@ sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 	openAction1->setStatusTip(tr("Open the First Image"));//当触发这个机制时，会在窗口最下方状态栏显示状态
 	openAction2 = new QAction( QIcon(":/images/doc-open"), tr("&打开待配准图像"), this );
 	openAction2->setStatusTip(tr("Open the Second Image"));//同上
-	SurfAction = new QAction( QIcon("tree"), tr("&SURF"), this );
+	SurfAction = new QAction( QIcon("tree"), tr("&快速配准算法"), this );
 	SurfAction->setStatusTip(tr("SURF Registration"));//同上
+	BigMapSURFAction = new QAction( QIcon("tree"), tr("&快速高精度配准算法"), this );
+	BigMapSURFAction->setStatusTip(tr("Advanced SURF Registration"));
 	DeleMapLayersAction = new QAction( QIcon(":/image/doc-close"),tr("&清除所有数据"),this);
 	DeleMapLayersAction->setStatusTip(tr("Clear all Datas"));
+
 
 	//第二步：将动作与函数相关联，形成信号-槽机制
 	connect(openAction1, SIGNAL(triggered()), this, SLOT(OpenFile1()));
 	connect(openAction2, SIGNAL(triggered()), this, SLOT(OpenFile2()));
+	connect(BigMapSURFAction,SIGNAL(triggered()), this, SLOT(AdBigMapRegistration()));
 	connect(SurfAction, SIGNAL(triggered()), this, SLOT(BigMapRegistration()));
 	connect(DeleMapLayersAction,SIGNAL(triggered()), this, SLOT(OnClearMapLayer()));
 
@@ -112,6 +118,7 @@ sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 	ui.menu_3->addAction(openAction1);
 	ui.menu_3->addAction(openAction2);
 	ui.menu_2->addAction(SurfAction);
+	ui.menu_2->addAction(BigMapSURFAction);//
 	ui.menu->addAction(DeleMapLayersAction);
 
 
@@ -402,8 +409,8 @@ void sy_2::BigMapRegistration()
 	else
 	{
 		
-		refImage = refLayer[i+1];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
-		senImage = senLayer[i+1];		
+		refImage = refLayer[i];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
+		senImage = senLayer[i];		
 		//
 //		double t4=(double)cvGetTickCount();//开始计时
 		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
@@ -412,15 +419,15 @@ void sy_2::BigMapRegistration()
 //		t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		//若i不等于1，则说明要对金字塔的某一层图像进行配准，这就需要进行裁剪重匹配等操作
 
-		Find_OverlapArea(i+1);//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
-
+		//Find_OverlapArea(i+1);//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
+		Cut_Count_Overlap(i);
 		//t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 
 		//	double t4=(double)cvGetTickCount();//开始计时
 		//接着对感兴趣区域的图像进行surf匹配
 		//int pathcount = simage_repath.size();
-		string OverlapImage1 = refImg[2];
-		string OverlapImage2 = senImg[2];
+		string OverlapImage1 = refOverlap[0];
+		string OverlapImage2 = senOverlap[0];
 		string OverlapResult = refImg[0] + "OverLapResultImage.jpg";
 //		double t5=(double)cvGetTickCount();//开始计时
 		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
@@ -757,12 +764,15 @@ void Find_OverlapArea ( int ilayer )
 
 	rePoint.clear();	//参考图像中裁剪出来的小图左上角在参考图像中的坐标
 	senPoint.clear();	//待配准图像中裁剪的小图左上角在待配准图像中的坐标
-
+	refOverlap.clear();
+	senOverlap.clear();
 	//给出裁剪图像的路径
 	string Overlap1 = refImg[0] + "refImage_Overlap.jpg";
 	string Overlap2 = senImg[0] + "senImage_Overlap.jpg";
-	refImg.push_back(Overlap1);//refImg[2]中保存参考图像重叠区域裁剪后的图像路径
-	senImg.push_back(Overlap2);//senImg[2]中保存待配准图像中重叠区域裁剪后图像路径
+	refOverlap.push_back(Overlap1);
+	senOverlap.push_back(Overlap2);
+//	refImg.push_back(Overlap1);//refImg[2]中保存参考图像重叠区域裁剪后的图像路径
+//	senImg.push_back(Overlap2);//senImg[2]中保存待配准图像中重叠区域裁剪后图像路径
 
 	int image1_xsize,image1_ysize; ///定义参考图像大小信息
 	int image2_xsize,image2_ysize;//定义待配准图像大小信息
@@ -900,4 +910,612 @@ void sy_2::OnClearMapLayer()
 	senPoint.clear();
 	refLayer.clear();
 	senLayer.clear();
+}
+
+
+void sy_2::AdBigMapRegistration()
+{
+
+	//*创建结果图像所在文件夹*//
+	string dir = refImg[0] + "BigMapResultFiles"; ///在参考图像文件夹下创建文件夹，保存小图和大图的配准结果
+	if(_access(dir.c_str(), 0) != -1)  
+	{  
+		cout << "文件夹已存在" <<endl;  
+		//system("pause");
+	}  
+	else  
+	{  
+		cout << "文件夹不存在，创建文件夹" << endl;  
+		_mkdir(dir.c_str()); 
+		//system("pause");
+	} 
+	string dir1 = dir + "/";
+
+	string sImageResultPath = dir1 + "PyramidImageRegResult.jpg";	//裁剪图像匹配结果图
+	string BigMapResult = dir1 + "BigMapRegistrationResult.tif";	//大图匹配结果图
+	resultImg.clear(); 
+	resultImg.push_back(dir1);				//resultImg[0]:结果图像所在文件夹
+	resultImg.push_back(sImageResultPath);	//resultImg[1]：降采样图像配准结果路径
+	resultImg.push_back(BigMapResult);		//resultImg[2]：大图配准结果
+
+	int i = refLayer.size()-2;
+	string refImage,senImage;	//这三个量分别用于临时存储用以匹配的图像路径，并传递给图像配准的函数
+
+	double t=(double)cvGetTickCount();//开始计时
+	//	double t3=(double)cvGetTickCount();//开始计时
+
+	//如果前面对金字塔层数进行了选择，或者改变，这个函数就需要能够适应这种改变
+	//首先应该对i进行判断，当i=-1时，表明没有金字塔层无需进行裁剪，直接进行匹配，
+	CvMat* H;//现在先不讨论图像大小时的问题，先把大图配准给改进
+	if (i <= 0)
+	{
+		refImage = refImg[1];
+		senImage = senImg[1];
+		//下面进行的是对小图的匹配
+		SURF_ON_TWO(refImage,senImage,sImageResultPath);
+		H = H_2[0];
+	}
+	else
+	{
+
+		refImage = refLayer[i+1];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
+		senImage = senLayer[i+1];		
+		//
+		//		double t4=(double)cvGetTickCount();//开始计时
+		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		SURF_ON_TWO(refImage,senImage,sImageResultPath);//调取金字塔中像素数小于1000的图像进行匹配
+		//double t4=(double)cvGetTickCount();//开始计时
+		//		t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		//若i不等于1，则说明要对金字塔的某一层图像进行配准，这就需要进行裁剪重匹配等操作
+
+		Find_OverlapArea(i+1);//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
+
+		//t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+
+		//	double t4=(double)cvGetTickCount();//开始计时
+		//接着对感兴趣区域的图像进行surf匹配
+		//int pathcount = simage_repath.size();
+		string OverlapImage1 = refOverlap[0];
+		string OverlapImage2 = senOverlap[0];
+		string OverlapResult = refImg[0] + "OverLapResultImage.jpg";
+		//		double t5=(double)cvGetTickCount();//开始计时
+		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		SURF_ON_TWO(OverlapImage1,OverlapImage2,OverlapResult); //该函数进行完毕后，在H_2[0]中保存的是当前图像间变换后的H矩阵
+		//		t5=(double)(cvGetTickCount()-t5)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		//Cut_Count_Overlap();//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
+		//下面从变换后的H矩阵中提取变换参数，用以对大图进行变换
+		H = H_2[0];
+
+		double smallhx,smallhy;///该参数表示两个裁剪出来的小图的平移参数
+		double bighx,bighy;//该参数表示待配准图像相对于参考图像的平移参数
+		//px = cvmGet( H, 0, 2 );
+		//py = cvmGet( H, 1, 2 );
+		smallhx = cvmGet( H, 0, 2 ) + rePoint[0].x; //这里算出的是待配准图像中感兴趣区域相对于参考图像的平移距离
+		smallhy = cvmGet( H, 1, 2 ) + rePoint[0].y;
+		//现在还需要知道 参考图像中的小图相对于大图的位置或者坐标
+		//即参考图像中裁剪出的小图左上角的坐标
+		CvMat *H1; //定义大图之间的变换矩阵，尤其是平移量进行更新
+
+		//下面两句根据裁剪出的待配准图像中的小图在参考图像中的位置，计算出待配准图像的原图的左上角坐标在参考图像坐标系中的位置（或者说是待配准图像左上角顶点的平移量）
+		bighx = smallhx - senPoint[0].x;
+		bighy = smallhy - senPoint[0].y;
+
+		int h1 = abs(bighx) + 0.5;
+		int h2 = abs(bighy) + 0.5;
+		//对大图间的变换矩阵中的平移量进行更新
+		H1 = H;
+		cvmSet(H1,0,2,bighx);
+		cvmSet(H1,1,2,bighy);
+		t=(double)(cvGetTickCount()-t)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		//得到变换参数之后，下面就要建立一个新的更大的图，用以存储两个大图配准的结果
+
+		//ResultImagePath.push_back(BigMapResult);
+		GDALAllRegister();
+		//将两个大图读入数据集中
+		GDALDataset* pSrcDS1 = ( GDALDataset* )GDALOpen(refImg[1].c_str(),GA_ReadOnly); 
+		GDALDataset* pSrcDS2 = ( GDALDataset* )GDALOpen(senImg[1].c_str(),GA_ReadOnly);
+
+		GDALDataType eDT1 = pSrcDS1->GetRasterBand(1)->GetRasterDataType();
+		GDALDataType eDT2 = pSrcDS2->GetRasterBand(1)->GetRasterDataType();
+
+
+		int iBandCount1 = pSrcDS1->GetRasterCount();
+		int iBandCount2 = pSrcDS2->GetRasterCount();
+
+		double adfGeoTransform[6] = {0};
+		//double adfGeoTransform2[6] = {0};
+
+		pSrcDS1->GetGeoTransform(adfGeoTransform);
+		pSrcDS2->GetGeoTransform(adfGeoTransform);
+
+
+		if (H1)
+		{
+
+			GDALDriver *poDriver = (GDALDriver *) GDALGetDriverByName("GTIFF");
+
+			int xsize1 = pSrcDS1->GetRasterXSize();
+			int ysize1 = pSrcDS1->GetRasterYSize();
+			int xsize2 = pSrcDS2->GetRasterXSize();
+			int ysize2 = pSrcDS2->GetRasterYSize();
+
+			int iDstWidth = h1 + xsize2;
+			int iDstHeight = h2 + ysize2;
+
+			//创建配准结果图像
+			GDALDataset *pDstDS = poDriver->Create(BigMapResult.c_str(), iDstWidth, iDstHeight, iBandCount1, eDT1, NULL);
+			pDstDS->SetGeoTransform(adfGeoTransform);
+			pDstDS->SetProjection(pSrcDS1->GetProjectionRef());
+
+			int *pBandMap = new int[iBandCount1];
+			for (int i=0; i<iBandCount1; i++)
+				pBandMap[i] = i+1;
+
+			// 下面这里需要根据数据类型来判断，申请不同类型的缓存来进行处理，这里仅仅以8bit图像进行演示
+			//下面操作是将两个图像都变换到配准结果图像中，只不过用的是分块的思想
+			if (eDT1 == GDT_Byte)	// 如果是8bit图像
+			{
+				char *pDataBuff = new char[xsize1/2*ysize1/2*iBandCount1];
+				//将参考图像变换到结果图像中
+				pSrcDS1->RasterIO(GF_Read, 0,0,xsize1/2, ysize1/2, pDataBuff, xsize1/2,  ysize1/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+				pDstDS->RasterIO(GF_Write, 0, 0,  xsize1/2,  ysize1/2, pDataBuff,  xsize1/2,  ysize1/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+
+				pSrcDS1->RasterIO(GF_Read, 0,ysize1/2,xsize1/2, ysize1/2, pDataBuff, xsize1/2,  ysize1/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+				pDstDS->RasterIO(GF_Write, 0, ysize1/2,  xsize1/2,  ysize1/2, pDataBuff,  xsize1/2,  ysize1/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+
+				pSrcDS1->RasterIO(GF_Read, xsize1/2,0,xsize1/2, ysize1/2, pDataBuff, xsize1/2,  ysize1/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+				pDstDS->RasterIO(GF_Write, xsize1/2, 0,  xsize1/2,  ysize1/2, pDataBuff,  xsize1/2,  ysize1/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+
+				pSrcDS1->RasterIO(GF_Read, xsize1/2,ysize1/2,xsize1/2, ysize1/2, pDataBuff, xsize1/2,  ysize1/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+				pDstDS->RasterIO(GF_Write, xsize1/2, ysize1/2,  xsize1/2,  ysize1/2, pDataBuff,  xsize1/2,  ysize1/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+
+				delete(pDataBuff);
+				char *pDataBuff2 = new char[xsize2/2*ysize2/2*iBandCount2];
+
+				pSrcDS2->RasterIO(GF_Read, 0,0,xsize2/2, ysize2/2, pDataBuff2, xsize2/2,  ysize2/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+				pDstDS->RasterIO(GF_Write,h1,h2, xsize2/2,  ysize2/2, pDataBuff2,  xsize2/2,  ysize2/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+
+				pSrcDS2->RasterIO(GF_Read, 0,ysize2/2,xsize2/2, ysize2/2, pDataBuff2, xsize2/2,  ysize2/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+				pDstDS->RasterIO(GF_Write,h1,h2+ysize2/2, xsize2/2,  ysize2/2, pDataBuff2,  xsize2/2,  ysize2/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+
+				pSrcDS2->RasterIO(GF_Read,xsize2/2,0,xsize2/2, ysize2/2, pDataBuff2, xsize2/2,  ysize2/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+				pDstDS->RasterIO(GF_Write,h1+xsize2/2,h2, xsize2/2,  ysize2/2, pDataBuff2,  xsize2/2,  ysize2/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+
+				pSrcDS2->RasterIO(GF_Read,xsize2/2,ysize2/2,xsize2/2, ysize2/2, pDataBuff2, xsize2/2,  ysize2/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+				pDstDS->RasterIO(GF_Write,h1+xsize2/2 ,h2+ysize2/2, xsize2/2,  ysize2/2, pDataBuff2,  xsize2/2,  ysize2/2, eDT1, iBandCount1, pBandMap, 0, 0, 0);
+
+				delete(pDataBuff2);
+
+				//				t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+
+			}
+			else
+			{
+				QMessageBox::information(NULL, "Title", "Failed!! !", QMessageBox::Yes, QMessageBox::Yes);
+
+			}
+
+			delete(pBandMap);
+
+			GDALClose((GDALDatasetH)pSrcDS1);
+			GDALClose((GDALDatasetH)pSrcDS2);
+			GDALClose((GDALDatasetH)pDstDS);
+
+		}
+
+
+	}
+
+	QString s1 = QString::number(t,'g',6);
+	ui.registratetime->setText(s1);
+	QString mse2 = QString::number(mese2,'g',6);
+	ui.mse->setText(mse2);
+	QString s2 = QString::number(num2,'g',6);
+	ui.ptpairsnum->setText(s2);
+	//QString size1 = QString::number(t3,'g',6);
+	//ui.refImageSize->setText(size1);
+	//QString size2 = QString::number(t3,'g',6);
+	//ui.senImageSize->setText(size2);
+
+	OpenResultFile1(resultImg[2]);
+
+}
+
+
+
+void Cut_Count_Overlap(int ilayer)		//传入的参数ilayer表示是对simage_repath[ilayer]路径中的图像进行处理
+{
+
+	//通过传递的参数ilayer计算从缩略图到源图的放大倍数
+	 
+	int iscale = static_cast<int>(pow(2.0,ilayer+1)); 
+	
+
+	rePoint.clear(); //保存参考图像中裁剪出来的小图的左上角坐标
+	senPoint.clear();//保存待配准图像中裁剪出来的小图的左上角坐标
+
+	//给出裁切出的图像的路径
+	string Overlap1 = refImg[0] + "reImage_Overlap.jpg";
+	string Overlap2 = senImg[0] + "senImage_Overlap.jpg";
+	refOverlap.clear();
+	senOverlap.clear();
+	refOverlap.push_back(Overlap1);
+	senOverlap.push_back(Overlap2);
+//	refImg.push_back(Overlap1);//refImg[2]中保存裁剪参考图像
+//	senImg.push_back(Overlap2);//senImg[2]中保存裁剪待配准图像
+
+	vector<int> ptpairs = ptpairs_befores;
+	int num  = ptpairs.size()/2;
+
+	int image1_xsize,image1_ysize; ///定义参考图像大小信息
+	int image2_xsize,image2_ysize;//定义待配准图像大小信息
+
+	int areaCount1[10] = {0,0,0,0,0,0,0,0,0,0};///每一个数字代表一块区域
+	int areaCount2[10] = {0,0,0,0,0,0,0,0,0,0};///
+	CvMat* H;///用于临时保存H矩阵
+	H = H_2[0]; //将第一次配准结果中的H矩阵传递过来。//此处也可以后续设计为一个函数传递的参数
+	double px, py; //待配准图像相对于参考图像平移的距离，也可作为重叠区域左上角或者左下角的坐标
+	double h1, h2, h3, h4;
+	double dx,dy;///定义重叠区域的大小
+	double hx,hy;///定义分块统计时，x和y方向每一小块的大小；
+	px = cvmGet( H, 0, 2 );
+	py = cvmGet( H, 1, 2 );
+	h1 = abs(px) + 0.5;////为了四舍五入所以加上0.5，这一点还没有想明白
+	h2 = abs(py) + 0.5;///故重叠区域左上角或者左下角的坐标即为：(h1,h2)
+	
+	///这里需要获取图像的大小参数
+	//先获取参考图像这边的信息
+	image1_xsize = img[0]->width;
+	image1_ysize = img[0]->height;
+
+	//再获取待配准图像的信息
+	image2_xsize = img[1]->width;
+	image2_ysize = img[1]->height;
+	
+	
+	//计算重叠区域的大小
+	dx = image1_xsize - h1;
+	dy = image1_ysize - h2;
+
+	//下面计算hx,hy
+	double fenkuai3 = 3;
+	hx = dx/fenkuai3;
+	hy = dy/fenkuai3;
+
+	//IplImage* image0 = cvLoadImage(simage_repath[2].c_str());
+	//Mat image0 = cvLoadImage(simage_repath[4].c_str());
+	//Mat image1 = cvLoadImage(simage_senpath[4].c_str());
+
+	////画出重叠区域的矩形框
+	//cvRectangle(img[0],cvPoint(h1,h2),cvPoint(image1_xsize,image1_ysize),cvScalar(0,0,255),3,4,0 );
+	//cvNamedWindow("OverLapArea",CV_WINDOW_AUTOSIZE);
+	//cvShowImage("img[0]WithOverLapArea",img[0]);
+	//cvWaitKey(0);
+	//cvReleaseImage(&img[0]);
+
+	CvSeq *CurrentKeypoints = objectKeypoints;
+	//CvSeq *PreKeypoints = imageKeypoints;
+	//CvSURFPoint* r1 = (CvSURFPoint*)cvGetSeqElem(CurrentKeypoints, ptpairs[i] );
+	//下面对参考图像中已经匹配的特征点进行统计
+	//char atom_window0[] = "OverLapArea0";  
+	//char atom_window1[] = "OverLapArea1";  
+	//char atom_window2[] = "OverLapArea2";  
+	//char atom_window3[] = "OverLapArea3";  
+	//char atom_window4[] = "OverLapArea4";  
+	//char atom_window5[] = "OverLapArea5";  
+	//char atom_window6[] = "OverLapArea6";  
+	//char atom_window7[] = "OverLapArea7";  
+	//char atom_window8[] = "OverLapArea8";  
+
+	//char atom1_window0[] = "OverLap1Area0";  
+	//char atom1_window1[] = "OverLap1Area1";  
+	//char atom1_window2[] = "OverLap1Area2";  
+	//char atom1_window3[] = "OverLap1Area3";  
+	//char atom1_window4[] = "OverLap1Area4";  
+	//char atom1_window5[] = "OverLap1Area5";  
+	//char atom1_window6[] = "OverLap1Area6";  
+	//char atom1_window7[] = "OverLap1Area7";  
+	//char atom1_window8[] = "OverLap1Area8";  
+
+	//统计特征点个数的段落 
+
+	for (int i = 0; i < ptpairs.size(); i++)
+	{
+		CvSURFPoint* r1 = (CvSURFPoint*)cvGetSeqElem(CurrentKeypoints, ptpairs[i] );
+
+
+		if (r1->pt.x >= h1 && r1->pt.x <= (h1+hx) )
+		{
+			if (r1->pt.y >= h2 && r1->pt.y <= (h2+hy))
+			{
+				areaCount1[0]++;
+
+//				rectangle(img[0],cvPoint(h1,h2),cvPoint(h1+hx,h2+hy),cvScalar(255,0,255),2,4,0 );
+//				circle(img[0],r1->pt,3,cvScalar(0,255,255),-1,8);
+
+				////cvNamedWindow("OverLapArea0",CV_WINDOW_AUTOSIZE);
+				//imshow(atom_window0,img[0]);
+
+			} 
+			else if(r1->pt.y > (h2+hy) && r1->pt.y <= (image1_ysize-hy) )
+			{
+				areaCount1[3]++;
+
+//				rectangle(img[0],cvPoint(h1,h2+hy),cvPoint(h1+hx,image1_ysize-hy),cvScalar(255,0,255),2,4,0 );
+//				circle(img[0],r1->pt,3,cvScalar(0,255,255),-1,8);
+
+				////cvNamedWindow("OverLapArea3",CV_WINDOW_AUTOSIZE);
+				//imshow(atom_window3,img[0]);
+
+			}
+			else if (r1->pt.y > image1_ysize-hy && r1->pt.y <= image1_ysize  )
+			{
+				areaCount1[6]++;
+//				rectangle(img[0],cvPoint(h1,image1_ysize-hy),cvPoint(h1+hx,image1_ysize),cvScalar(255,0,255),2,4,0 );
+//				circle(img[0],r1->pt,3,cvScalar(0,255,255),-1,8);
+
+				////cvNamedWindow("OverLapArea6",CV_WINDOW_AUTOSIZE);
+				//imshow(atom_window6,img[0]);
+			}
+
+		}
+		else if ( r1->pt.x > h1+hx && r1->pt.x <= image1_xsize-hx )
+		{
+			if (r1->pt.y >= h2 && r1->pt.y <= (h2+hy))
+			{
+				areaCount1[1]++;
+//				rectangle(img[0],cvPoint(h1+hx,h2),cvPoint(image1_xsize-hx,image1_ysize),cvScalar(255,0,255),2,4,0 );
+//				circle(img[0],r1->pt,3,cvScalar(0,255,255),-1,8);
+				////cvNamedWindow("OverLapArea1",CV_WINDOW_AUTOSIZE);
+				//imshow(atom_window1,img[0]);
+			} 
+			else if(r1->pt.y > (h2+hy) && r1->pt.y <= (image1_ysize-hy) )
+			{
+				areaCount1[4]++;
+				//rectangle(img[0],cvPoint(h1+hx,h2+hy),cvPoint(image1_xsize-hx,image1_ysize-hy),cvScalar(255,0,255),2,4,0 );
+				//circle(img[0],r1->pt,3,cvScalar(0,255,255),-1,8);
+				////cvNamedWindow("OverLapArea4",CV_WINDOW_AUTOSIZE);
+				//imshow(atom_window4,img[0]);
+			}
+			else if (r1->pt.y > image1_ysize-hy && r1->pt.y <= image1_ysize  )
+			{
+				areaCount1[7]++;
+//				rectangle(img[0],cvPoint(h1+hx,image1_ysize-hy),cvPoint(image1_xsize-hx,image1_ysize),cvScalar(255,0,255),2,4,0 );
+//				circle(img[0],r1->pt,3,cvScalar(0,255,255),-1,8);
+				////cvNamedWindow("OverLapArea7",CV_WINDOW_AUTOSIZE);
+				//imshow(atom_window7,img[0]);
+			}
+
+		}
+		else if ( r1->pt.x > image1_xsize-hx && r1->pt.x <= image1_xsize )
+		{
+			if (r1->pt.y >= h2 && r1->pt.y <= (h2+hy))
+			{
+				areaCount1[2]++;
+//				rectangle(img[0],cvPoint(image1_xsize-hx,h2),cvPoint(image1_xsize,image1_ysize),cvScalar(255,0,255),2,4,0 );
+//				circle(img[0],r1->pt,3,cvScalar(0,255,255),-1,8);
+				////cvNamedWindow("OverLapArea2",CV_WINDOW_AUTOSIZE);
+				//imshow(atom_window2,img[0]);
+			} 
+			else if(r1->pt.y > (h2+hy) && r1->pt.y <= (image1_ysize-hy) )
+			{
+				areaCount1[5]++;
+//				rectangle(img[0],cvPoint(image1_xsize-hx,h2+hy),cvPoint(image1_xsize,image1_ysize-hy),cvScalar(255,0,255),2,4,0 );
+//				circle(img[0],r1->pt,3,cvScalar(0,255,255),-1,8);
+				////cvNamedWindow("OverLapArea5",CV_WINDOW_AUTOSIZE);
+				//imshow(atom_window5,img[0]);
+			}
+			else if (r1->pt.y > image1_ysize-hy && r1->pt.y <= image1_ysize  )
+			{
+				areaCount1[8]++;
+//				rectangle(img[0],cvPoint(image1_xsize-hx,image1_ysize-hy),cvPoint(image1_xsize,image1_ysize),cvScalar(255,0,255),2,4,0 );
+//				circle(img[0],r1->pt,3,cvScalar(0,255,255),-1,8);
+				////cvNamedWindow("OverLapArea8",CV_WINDOW_AUTOSIZE);
+				//imshow(atom_window8,img[0]);
+			}
+		}
+		i++;//因为ptpairs中存储的是一对一对的特征点的索引号，这里值需要提取出其中参考图像中特征点的序号，故应该隔一个一取
+	}
+
+
+	int maxvaule1 = areaCount1[0]; //表示数组中的最大值
+	int maxnum1 = 0;	//标记数组中最大值的序号，也即对应区域
+	//循环结束，统计数量最大的区域,并画出来
+	for (int i = 1; i < 9; i++)
+	{
+		
+		if (areaCount1[i] > maxvaule1 )
+		{
+			maxvaule1 = areaCount1[i];
+			maxnum1 = i;
+		}
+
+	}
+// 	char ch;
+// 	itoa(maxnum,ch,10);
+	//得到最多特征点的区域的序号，就对应地画出来
+	//rectangle(img[0],cvPoint(h1,h2),cvPoint(h1+hx,h2+hy),cvScalar(0,0,255),3,4,0 );
+	
+	switch (maxnum1)
+	{
+	case 0:
+		//参考图像的裁剪
+		CvPoint2D64f point0;
+		point0.x= iscale*h1;///不行，应该把这些数都改为浮点数
+		point0.y = iscale*h2;
+		rePoint.push_back(point0);
+	//	rectangle(img[0],cvPoint(h1,h2),cvPoint(h1+hx,h2+hy),cvScalar(0,255,255),2,4,0 );
+	//	imshow(atom_window0,img[0]);
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point0.x,point0.y,iscale*hx,iscale*hy,"GTiff");
+		//待配准图像的裁剪
+		CvPoint2D64f point00;
+		point0.x = 0;///不行，应该把这些数都改为浮点数
+		point0.y = 0;
+		senPoint.push_back(point00);
+
+	//	rectangle(img[1],cvPoint(0,0),cvPoint(hx,hy),cvScalar(255,255,0),2,4,0 );
+	//	imshow(atom1_window0,img[1]);
+		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),0,0,iscale*hx,iscale*hy,"GTiff");
+
+		//waitKey(0);
+		break;
+	case 1:
+		CvPoint2D64f point1;
+		point1.x = iscale*(h1+hx);///不行，应该把这些数都改为浮点数
+		point1.y = iscale*h2;
+		rePoint.push_back(point1);
+
+	//	rectangle(img[0],cvPoint(h1+hx,h2),cvPoint(image1_xsize-hx,h2+hy),cvScalar(0,255,255),2,4,0 );
+	//	imshow(atom_window1,img[0]);
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point1.x,point1.y,iscale*(image1_xsize-2*hx),iscale*hy,"GTiff");
+		CvPoint2D64f point11;
+		point11.x = iscale*hx;///不行，应该把这些数都改为浮点数
+		point11.y = 0;
+		senPoint.push_back(point11);
+	//	rectangle(img[1],cvPoint(hx,0),cvPoint(dx-hx,hy),cvScalar(255,255,0),2,4,0 );
+	//	imshow(atom1_window1,img[1]);
+		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),point11.x,point11.y,iscale*(dx-hx*2),iscale*hy,"GTiff");
+		//waitKey(0);
+		break;
+	case 2:
+		CvPoint2D64f point2;
+		point2.x =iscale*(image1_xsize-hx);///不行，应该把这些数都改为浮点数
+		point2.y = iscale*h2;
+		rePoint.push_back(point2);
+	//	rectangle(img[0],cvPoint(image1_xsize-hx,h2),cvPoint(image1_xsize,h2+hy),cvScalar(0,255,255),2,4,0 );
+	//	imshow(atom_window2,img[0]);
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point2.x,point2.y,iscale*hx,iscale*hy,"GTiff");
+		CvPoint2D64f point22;
+		point22.x = iscale*(dx-hx);///不行，应该把这些数都改为浮点数
+		point22.y = 0;
+		senPoint.push_back(point22);
+
+	//	rectangle(img[1],cvPoint(dx-hx,0),cvPoint(dx,hy),cvScalar(255,255,0),2,4,0 );
+	//	imshow(atom1_window2,img[1]);
+		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),point22.x,point22.y,iscale*hx,iscale*hy,"GTiff");
+		//waitKey(0);
+		break;
+	case 3:
+		CvPoint2D64f point3;
+		point3.x = iscale*h1;///不行，应该把这些数都改为浮点数
+		point3.y = iscale*(h2+hy);
+		rePoint.push_back(point3);
+
+	//	rectangle(img[0],cvPoint(h1,h2+hy),cvPoint(h1+hx,image1_ysize-hy),cvScalar(0,255,255),2,4,0 );
+	//	imshow(atom_window3,img[0]);
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point3.x,point3.y,iscale*hx,iscale*hy,"GTiff");
+		CvPoint2D64f point33;
+		point33.x = 0;///不行，应该把这些数都改为浮点数
+		point33.y = iscale*hy;
+		senPoint.push_back(point33);
+	//	rectangle(img[1],cvPoint(0,hy),cvPoint(hx,dy-hy),cvScalar(255,255,0),2,4,0 );
+	//	imshow(atom1_window3,img[1]);
+		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),point33.x,point33.y,iscale*hx,iscale*(dy-2*hy),"GTiff");
+		//waitKey(0);
+		break;
+	case 4:	
+		CvPoint2D64f point4;
+		point4.x = iscale*(h1+hx);///不行，应该把这些数都改为浮点数
+		point4.y = iscale*(h2+hy);
+		rePoint.push_back(point4);
+	//	rectangle(img[0],cvPoint(h1+hx,h2+hy),cvPoint(image1_xsize-hx,image1_ysize-hy),cvScalar(0,255,255),2,4,0 );
+	//	imshow(atom_window4,img[0]);
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point4.x,point4.y,iscale*(image1_xsize-2*hx),iscale*(image1_ysize-2*hy),"GTiff");
+
+		CvPoint2D64f point44;
+		point44.x = iscale*hx;///不行，应该把这些数都改为浮点数
+		point44.y = iscale*hy;
+		senPoint.push_back(point44);
+
+//		rectangle(img[1],cvPoint(hx,hy),cvPoint(dx-hx,dy-hy),cvScalar(255,255,0),2,4,0 );
+//		imshow(atom1_window4,img[1]);
+		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),point44.x,point44.y,iscale*(dx-2*hx),iscale*(dy-2*hy),"GTiff");
+		//waitKey(0);
+		break;
+	case 5:
+		CvPoint2D64f point5;
+		point5.x = iscale*(image1_xsize-hx);///不行，应该把这些数都改为浮点数
+		point5.y = iscale*(h2+hy);
+		rePoint.push_back(point5);
+
+//		rectangle(img[0],cvPoint(image1_xsize-hx,h2+hy),cvPoint(image1_xsize,image1_ysize-hy),cvScalar(0,255,255),2,4,0 );
+//		imshow(atom_window5,img[0]);
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point5.x,point5.y,iscale*hx,iscale*(image1_ysize-2*hy),"GTiff");
+
+		CvPoint2D64f point55;
+		point55.x = iscale*(dx-hx);///不行，应该把这些数都改为浮点数
+		point55.y = iscale*hy;
+		senPoint.push_back(point55);
+//		rectangle(img[1],cvPoint(dx-hx,hy),cvPoint(dx,dy-hy),cvScalar(255,255,0),2,4,0 );
+//		imshow(atom1_window5,img[1]);
+		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),point55.x,point55.y,iscale*hx,iscale*(dy-2*hy),"GTiff");
+
+
+		//waitKey(0);
+		break;
+	case 6:
+		CvPoint2D64f point6;
+		point6.x = iscale*h1;///不行，应该把这些数都改为浮点数
+		point6.y = iscale*(image1_ysize-hy);
+		rePoint.push_back(point6);
+
+//		rectangle(img[0],cvPoint(h1,image1_ysize-hy),cvPoint(h1+hx,image1_ysize),cvScalar(0,255,255),2,4,0 );
+//		imshow(atom_window6,img[0]);
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point6.x,point6.y,iscale*hx,iscale*hy,"GTiff");
+
+		CvPoint2D64f point66;
+		point66.x = 0;///不行，应该把这些数都改为浮点数
+		point66.y = iscale*(dy-hy);
+		senPoint.push_back(point66);
+//		rectangle(img[1],cvPoint(0,dy-hy),cvPoint(hx,dy),cvScalar(255,255,0),2,4,0 );
+//		imshow(atom1_window6,img[1]);
+		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),point66.x,point66.y,iscale*hx,iscale*hy,"GTiff");
+
+	//	waitKey(0);
+		break;
+	case 7:
+		CvPoint2D64f point7;
+		point7.x = iscale*(h1+hx);///不行，应该把这些数都改为浮点数
+		point7.y = iscale*(image1_ysize-hy);
+		rePoint.push_back(point7);
+
+//		rectangle(img[0],cvPoint(h1+hx,image1_ysize-hy),cvPoint(image1_xsize-hx,image1_ysize),cvScalar(0,255,255),2,4,0 );
+//		imshow(atom_window7,img[0]);
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point7.x,point7.y,iscale*(image1_xsize-2*hx),iscale*hy,"GTiff");
+
+		CvPoint2D64f point77;
+		point77.x = iscale*hx;///不行，应该把这些数都改为浮点数
+		point77.y = iscale*(dy-hy);
+		senPoint.push_back(point77);
+//		rectangle(img[1],cvPoint(hx,dy-hy),cvPoint(dx-hx,dy),cvScalar(255,255,0),2,4,0 );
+//		imshow(atom1_window7,img[1]);
+		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),point77.x,point77.y,iscale*(dx-2*hx),iscale*hy,"GTiff");
+
+
+		//waitKey(0);
+		break;
+	case 8:
+		CvPoint2D64f point8;
+		point8.x = iscale*(image1_xsize-hx);///不行，应该把这些数都改为浮点数
+		point8.y = iscale*(image1_ysize-hy);
+		rePoint.push_back(point8);
+
+	//	rectangle(img[0],cvPoint(image1_xsize-hx,image1_ysize-hy),cvPoint(image1_xsize,image1_ysize),cvScalar(0,255,255),2,4,0 );
+	//	imshow(atom_window8,img[0]);
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point8.x,point8.y,iscale*hx,iscale*hy,"GTiff");
+
+		CvPoint2D64f point88;
+		point88.x = iscale*(dx-hx);///不行，应该把这些数都改为浮点数
+		point88.y = iscale*(dy-hy);
+		senPoint.push_back(point88);
+	//	rectangle(img[1],cvPoint(dx-hx,dy-hy),cvPoint(dx,dy),cvScalar(255,255,0),2,4,0 );
+	//	imshow(atom1_window8,img[1]);
+		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),point88.x,point88.y,iscale*hx,iscale*hy,"GTiff");
+
+
+		//waitKey(0);
+		break;
+	}
+	
+
 }

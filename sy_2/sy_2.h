@@ -96,11 +96,13 @@ public slots:
 	void OpenResultFile1(string DstImagePath);
 	void BigMapRegistration(); ///大图配准
 	void OnClearMapLayer();//该函数用于清除Map控件中的图像，以便于显示其他图像
-
+	void AdBigMapRegistration();
 private:
 	QAction *openAction1,*openAction2;
 	QAction *SurfAction;
 	QAction *DeleMapLayersAction;
+	QAction *BigMapSURFAction;
+
 //	QAction *openBigMapResult;
 
 

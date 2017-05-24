@@ -22,7 +22,7 @@ static const uint qt_meta_data_sy_2[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       6,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -35,6 +35,7 @@ static const uint qt_meta_data_sy_2[] = {
       43,   30,    5,    5, 0x0a,
       67,    5,    5,    5, 0x0a,
       88,    5,    5,    5, 0x0a,
+     106,    5,    5,    5, 0x0a,
 
        0        // eod
 };
@@ -43,6 +44,7 @@ static const char qt_meta_stringdata_sy_2[] = {
     "sy_2\0\0OpenFile1()\0OpenFile2()\0"
     "DstImagePath\0OpenResultFile1(string)\0"
     "BigMapRegistration()\0OnClearMapLayer()\0"
+    "AdBigMapRegistration()\0"
 };
 
 void sy_2::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -56,6 +58,7 @@ void sy_2::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void *
         case 2: _t->OpenResultFile1((*reinterpret_cast< string(*)>(_a[1]))); break;
         case 3: _t->BigMapRegistration(); break;
         case 4: _t->OnClearMapLayer(); break;
+        case 5: _t->AdBigMapRegistration(); break;
         default: ;
         }
     }
@@ -93,9 +96,9 @@ int sy_2::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 6;
     }
     return _id;
 }
