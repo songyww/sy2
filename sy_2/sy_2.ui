@@ -97,73 +97,162 @@
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>730</x>
-      <y>500</y>
-      <width>251</width>
-      <height>231</height>
+      <x>780</x>
+      <y>490</y>
+      <width>171</width>
+      <height>301</height>
      </rect>
     </property>
     <property name="title">
-     <string>大幅面图像匹配</string>
+     <string>超大图像快速匹配算法</string>
     </property>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>参考图像尺寸</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>待配准图像尺寸</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>匹配点对</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>算法时间</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>算法精度</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+     <item row="8" column="0">
+      <widget class="QLineEdit" name="mse"/>
      </item>
-     <item row="0" column="1">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QLineEdit" name="refImageSize"/>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="senImageSize"/>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="ptpairsnum"/>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="registratetime"/>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="mse"/>
-       </item>
-      </layout>
+     <item row="10" column="0">
+      <widget class="QLineEdit" name="shift_y"/>
+     </item>
+     <item row="12" column="0">
+      <widget class="QLineEdit" name="rotate"/>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLineEdit" name="shift_x"/>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLineEdit" name="refImageSize"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLineEdit" name="ptpairsnum"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLineEdit" name="senImageSize"/>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLineEdit" name="registratetime"/>
+     </item>
+     <item row="11" column="0">
+      <widget class="QLineEdit" name="scale"/>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>1060</x>
+      <y>490</y>
+      <width>181</width>
+      <height>301</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>超大图像快速高精度匹配算法</string>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QLineEdit" name="refImageSize_2"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLineEdit" name="senImageSize_2"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLineEdit" name="ptpairsnum_2"/>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLineEdit" name="registratetime_2"/>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLineEdit" name="mse_2"/>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLineEdit" name="shift_x_2"/>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLineEdit" name="shift_y_2"/>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLineEdit" name="scale_2"/>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLineEdit" name="rotate_2"/>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>950</x>
+      <y>500</y>
+      <width>111</width>
+      <height>291</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="8" column="0" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_8">
+       <property name="text">
+        <string>缩放比例</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>算法时间</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>算法精度</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>参考图像尺寸</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>平移量-Y</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>旋转度数</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>平移量-X</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>待配准图像尺寸</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0" alignment="Qt::AlignHCenter">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>匹配点对</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -193,8 +282,14 @@
      <string>超大图像配准</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>图像快速定位</string>
+    </property>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
+   <addaction name="menu_4"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">

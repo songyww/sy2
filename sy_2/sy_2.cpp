@@ -25,6 +25,7 @@ vector<CvPoint2D64f> rePoint;
 vector<CvPoint2D64f> senPoint;
 int num1;
 int num2;
+double mese1;//小图配准精度
 double mese2;//大图配准精度
 vector<CvMat*> H_1;///暂时没有用到
 vector<CvMat*> H_2;///用以存储H矩阵
@@ -35,8 +36,8 @@ vector<int> ptpairs_befores; //存储挑选之前的匹配的特征点对
 CvMat *OverLap1;
 CvMat *OverLap2;
 
-
-
+int FileOpenFlag1 ;
+int FileOpenFlag2 ;
 using namespace std;
 using namespace cv;
 
@@ -120,8 +121,8 @@ sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 	ui.menu_2->addAction(SurfAction);
 	ui.menu_2->addAction(BigMapSURFAction);//
 	ui.menu->addAction(DeleMapLayersAction);
-
-
+	FileOpenFlag1 = 0;
+	FileOpenFlag2 = 0;
 }
 
 sy_2::~sy_2()
@@ -172,6 +173,7 @@ void sy_2::AddMapToolBarCtr(IToolbarControlPtr pToolbar)
 
 void sy_2::OpenFile1()
 {
+	FileOpenFlag1 = 1;
 	PyramidBase pyramid1; 
 	refImg.clear();
 	QString file_full1,file_name1,m_strFileName1;
@@ -250,10 +252,21 @@ void sy_2::OpenFile1()
 
 	m_pMapControl1->Refresh(esriViewAll);  
 
+	FileOpenFlag1 = 1;
+	//对图像大小进行判断
+	if (pyramid1.iWidth < 1000 || pyramid1.iHeight < 1000)
+		FileOpenFlag1 = 2;
+	else if(pyramid1.iWidth < 4300 || (pyramid1.iHeight < 4300))
+		FileOpenFlag1 = 3;
+	else
+		FileOpenFlag1 = 4;
+
+
 }
 
 void sy_2::OpenFile2()
 {
+	
 	PyramidBase pyramid2; 
 	senImg.clear();
 	senLayer.clear();
@@ -332,42 +345,49 @@ void sy_2::OpenFile2()
 	IActiveViewPtr pActiveView(m_pMapControl2);
 
 	m_pMapControl2->Refresh(esriViewAll);  
+
+	FileOpenFlag2 = 1;
+	
+	//若图像打开了，则进行判断大小
+	if (pyramid2.iWidth < 1000 || pyramid2.iHeight < 1000)
+		FileOpenFlag2 = 2;
+	else if(pyramid2.iWidth < 4300 || (pyramid2.iHeight < 4300))
+		FileOpenFlag2 = 3;
+	else
+		FileOpenFlag2 = 4;
+	
+	if (FileOpenFlag1>0 && FileOpenFlag2>0)
+	{
+		if(FileOpenFlag1 == 2 && FileOpenFlag2 == 2)
+		{
+			//则提示使用小图匹配算法
+		}
+		else if (FileOpenFlag1 == 3 && FileOpenFlag2 == 2)
+		{
+			//则提示使用快速定位算法
+		}
+		else if (FileOpenFlag1 == 4 && FileOpenFlag2 == 4)
+		{
+			//则提示使用超大图像配准算法
+		}
+
+
+	}
+
 }
 
-
-//void sy_2::OpenResultFile1(string DstImagePath)
-//{
-//	PyramidBase pyramid1; 
-//	pyramid1.InFilePath = DstImagePath.c_str(); //配准结果图像完整路径
-//	pyramid1.FilePath = resultImg[0].c_str();
-//	pyramid1.CheckPyramid();
-//
-//	BSTR bstr_str = _bstr_t(DstImagePath.c_str());
-//	
-//	HRESULT hr;
-//
-//	IRasterLayerPtr pRasterLy(CLSID_RasterLayer);
-//
-//	hr=pRasterLy->CreateFromFilePath(bstr_str);
-//
-//	if(FAILED(hr))
-//
-//		return;
-//
-//	ILayerPtr pLyr(pRasterLy);
-//
-//	m_pMapControl4->AddLayer(pLyr,0);
-//
-//	IActiveViewPtr pActiveView(m_pMapControl4);
-//
-//	m_pMapControl4->Refresh(esriViewAll);  
-//}
 
 //大图配准
 void sy_2::BigMapRegistration()
 {
+
 	
-	//*创建结果图像所在文件夹*//
+	double t2=(double)cvGetTickCount();//开始计时
+	double t3=(double)cvGetTickCount();//开始计时
+	///首先对小图进行配准，故调用对小图匹配的算法
+
+	//先定义对金字塔小图配准的结果图像的路径，暂定将结果图像放置在参考图像文件夹下
+
 	string dir = refImg[0] + "BigMapResultFiles"; ///在参考图像文件夹下创建文件夹，保存小图和大图的配准结果
 	if(_access(dir.c_str(), 0) != -1)  
 	{  
@@ -380,59 +400,70 @@ void sy_2::BigMapRegistration()
 		_mkdir(dir.c_str()); 
 		//system("pause");
 	} 
-	string dir1 = dir + "/";
+	string dir1 = dir + "\\";
 
-	string sImageResultPath = dir1 + "PyramidImageRegResult.jpg";	//裁剪图像匹配结果图
-	string BigMapResult = dir1 + "BigMapRegistrationResult.tif";	//大图匹配结果图
+	string sImageResultPath = dir1 + "PyramidImageRegResult.jpg";
+	string BigMapResult = dir1 + "BigMapRegistrationResult.tif";
+
 	resultImg.clear(); 
-	resultImg.push_back(dir1);				//resultImg[0]:结果图像所在文件夹
-	resultImg.push_back(sImageResultPath);	//resultImg[1]：降采样图像配准结果路径
-	resultImg.push_back(BigMapResult);		//resultImg[2]：大图配准结果
-	
-	int i = refLayer.size()-2;
-	string refImage,senImage;	//这三个量分别用于临时存储用以匹配的图像路径，并传递给图像配准的函数
 
-	double t=(double)cvGetTickCount();//开始计时
-//	double t3=(double)cvGetTickCount();//开始计时
+	resultImg.push_back(dir1);
+	resultImg.push_back(sImageResultPath);
+	resultImg.push_back(BigMapResult);
 
-	//如果前面对金字塔层数进行了选择，或者改变，这个函数就需要能够适应这种改变
-	//首先应该对i进行判断，当i=-1时，表明没有金字塔层无需进行裁剪，直接进行匹配，
-	CvMat* H;//现在先不讨论图像大小时的问题，先把大图配准给改进
-	if (i <= 0)
+
+	//t2=(double)cvGetTickCount();//开始计时
+	//double t1=(double)cvGetTickCount();//开始计时
+
+	//这里需要对第一次进行匹配的缩略图进行选择，由于后面还要用到该函数，且后面的匹配不涉及缩略图的选择，只是跟路径有关，故这里添加对第一次匹配的选择
+	///缩略图匹配的两种选择策略：第一种是默认的选择（我们自己设定合适的大小进行匹配）；第二种是给定的选择；所以需要判断
+	///
+	int i = 1;
+	string reImage,senImage;//这三个量分别用于临时存储用以匹配的图像路径，并传递给图像配准的函数
+	for ( i; i ++ ; i < refLayer.size())
 	{
-		refImage = refImg[1];
-		senImage = senImg[1];
-		//下面进行的是对小图的匹配
-		SURF_ON_TWO(refImage,senImage,sImageResultPath);
-		H = H_2[0];
+		
+		IplImage * image = cvLoadImage(refLayer[i].c_str());
+		//依次对原图和其余各层金字塔的大小进行判断；选择合适的层进行匹配
+		if (image->width <= 1000 || image->height <= 1000)
+		{
+			reImage = refLayer[i];
+			senImage = senLayer[i];
+			break;
+		}
+
+	}
+	SURF_ON_TWO(reImage,senImage,sImageResultPath);//调取金字塔中像素数小于1000的图像进行匹配
+	cv::initModule_nonfree();
+	CvMat* H;
+	CvMat h;
+	CvMat* H1=&h;
+	double a[9];
+	double px,py;
+	double sfx,sfy;
+
+	double R11,R12,R21,R22,R13,R23,R33;
+	vector<int>ptpairs1;
+	if (i == 1)
+	{
+		 OpenResultFile1(sImageResultPath);			
 	}
 	else
 	{
-		
-		refImage = refLayer[i];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
-		senImage = senLayer[i];		
-		//
-//		double t4=(double)cvGetTickCount();//开始计时
-		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
-		SURF_ON_TWO(refImage,senImage,sImageResultPath);//调取金字塔中像素数小于1000的图像进行匹配
-		//double t4=(double)cvGetTickCount();//开始计时
-//		t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		//若i不等于1，则说明要对金字塔的某一层图像进行配准，这就需要进行裁剪重匹配等操作
 
-		//Find_OverlapArea(i+1);//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
-		Cut_Count_Overlap(i);
+		Cut_Count_Overlap(i);//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
+
 		//t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 
 		//	double t4=(double)cvGetTickCount();//开始计时
 		//接着对感兴趣区域的图像进行surf匹配
-		//int pathcount = simage_repath.size();
+	//	int pathcount = simage_repath.size();
 		string OverlapImage1 = refOverlap[0];
 		string OverlapImage2 = senOverlap[0];
 		string OverlapResult = refImg[0] + "OverLapResultImage.jpg";
-//		double t5=(double)cvGetTickCount();//开始计时
-		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		SURF_ON_TWO(OverlapImage1,OverlapImage2,OverlapResult); //该函数进行完毕后，在H_2[0]中保存的是当前图像间变换后的H矩阵
-//		t5=(double)(cvGetTickCount()-t5)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		//	t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		//Cut_Count_Overlap();//对结果图像中匹配特征进行统计，并将感兴趣区域进行裁切并保存
 		//下面从变换后的H矩阵中提取变换参数，用以对大图进行变换
 		H = H_2[0];
@@ -457,7 +488,7 @@ void sy_2::BigMapRegistration()
 		H1 = H;
 		cvmSet(H1,0,2,bighx);
 		cvmSet(H1,1,2,bighy);
-		t=(double)(cvGetTickCount()-t)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		t2=(double)(cvGetTickCount()-t2)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		//得到变换参数之后，下面就要建立一个新的更大的图，用以存储两个大图配准的结果
 
 		//ResultImagePath.push_back(BigMapResult);
@@ -537,7 +568,7 @@ void sy_2::BigMapRegistration()
 
 				delete(pDataBuff2);
 
-//				t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+				t3=(double)(cvGetTickCount()-t3)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 
 			}
 			else
@@ -554,10 +585,12 @@ void sy_2::BigMapRegistration()
 
 		}
 
+		OpenResultFile1(BigMapResult);
 
 	}
 
-	QString s1 = QString::number(t,'g',6);
+
+	QString s1 = QString::number(t2,'g',6);
 	ui.registratetime->setText(s1);
 	QString mse2 = QString::number(mese2,'g',6);
 	ui.mse->setText(mse2);
@@ -568,7 +601,7 @@ void sy_2::BigMapRegistration()
 	//QString size2 = QString::number(t3,'g',6);
 	//ui.senImageSize->setText(size2);
 
-	OpenResultFile1(resultImg[2]);
+	
 }
 
 
@@ -886,10 +919,10 @@ void Find_OverlapArea ( int ilayer )
 void sy_2::OnClearMapLayer()
 {
 	HRESULT DeleteLayer1,DeleteLayer2,DeleteLayer3,DeleteLayer4;
-	DeleteLayer1 = m_pMapControl1->DeleteLayer(0);////这两个函数都可以清除数据。
-	DeleteLayer2 = m_pMapControl2->ClearLayers();
+	DeleteLayer1 = m_pMapControl1->ClearLayers();////这两个函数都可以清除数据。
+	DeleteLayer2 = m_pMapControl2->ClearLayers();//DeletLayer(0)只能清除最上面的图像，但是不能清除所有图像，但是ClearLayers()可以清除所有图像
 	//	DeleteLayer3 = m_pMapControl3->ClearLayers();
-	DeleteLayer4 = m_pMapControl4->DeleteLayer(0);////这两个函数都可以清除数据。
+	DeleteLayer4 = m_pMapControl4->ClearLayers();////这两个函数都可以清除数据。
 	if (img.size())
 	{
 		for ( int i = 0; i < img.size(); i ++ )
@@ -1221,7 +1254,7 @@ void Cut_Count_Overlap(int ilayer)		//传入的参数ilayer表示是对simage_repath[ilay
 
 	for (int i = 0; i < ptpairs.size(); i++)
 	{
-		CvSURFPoint* r1 = (CvSURFPoint*)cvGetSeqElem(CurrentKeypoints, ptpairs[i] );
+		CvSURFPoint* r1 = (CvSURFPoint*)cvGetSeqElem(objectKeypoints, ptpairs[i+1] );
 
 
 		if (r1->pt.x >= h1 && r1->pt.x <= (h1+hx) )
@@ -1346,17 +1379,17 @@ void Cut_Count_Overlap(int ilayer)		//传入的参数ilayer表示是对simage_repath[ilay
 		rePoint.push_back(point0);
 	//	rectangle(img[0],cvPoint(h1,h2),cvPoint(h1+hx,h2+hy),cvScalar(0,255,255),2,4,0 );
 	//	imshow(atom_window0,img[0]);
-		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point0.x,point0.y,iscale*hx,iscale*hy,"GTiff");
+	
 		//待配准图像的裁剪
 		CvPoint2D64f point00;
-		point0.x = 0;///不行，应该把这些数都改为浮点数
-		point0.y = 0;
+		point00.x = 0;///不行，应该把这些数都改为浮点数
+		point00.y = 0;
 		senPoint.push_back(point00);
 
 	//	rectangle(img[1],cvPoint(0,0),cvPoint(hx,hy),cvScalar(255,255,0),2,4,0 );
 	//	imshow(atom1_window0,img[1]);
 		ImageCut(senImg[1].c_str(),senOverlap[0].c_str(),0,0,iscale*hx,iscale*hy,"GTiff");
-
+		ImageCut(refImg[1].c_str(),refOverlap[0].c_str(),point0.x,point0.y,iscale*hx,iscale*hy,"GTiff");
 		//waitKey(0);
 		break;
 	case 1:

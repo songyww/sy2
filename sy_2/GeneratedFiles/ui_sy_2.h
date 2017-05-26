@@ -24,7 +24,6 @@
 #include <QtGui/QMenuBar>
 #include <QtGui/QStatusBar>
 #include <QtGui/QToolBar>
-#include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -48,18 +47,37 @@ public:
     QAxWidget *MapCtr4;
     QGroupBox *groupBox;
     QGridLayout *gridLayout;
-    QVBoxLayout *verticalLayout;
-    QLabel *label_3;
-    QLabel *label_4;
-    QLabel *label_5;
+    QLineEdit *mse;
+    QLineEdit *shift_y;
+    QLineEdit *rotate;
+    QLineEdit *shift_x;
+    QLineEdit *refImageSize;
+    QLineEdit *ptpairsnum;
+    QLineEdit *senImageSize;
+    QLineEdit *registratetime;
+    QLineEdit *scale;
+    QGroupBox *groupBox_2;
+    QGridLayout *gridLayout_3;
+    QLineEdit *refImageSize_2;
+    QLineEdit *senImageSize_2;
+    QLineEdit *ptpairsnum_2;
+    QLineEdit *registratetime_2;
+    QLineEdit *mse_2;
+    QLineEdit *shift_x_2;
+    QLineEdit *shift_y_2;
+    QLineEdit *scale_2;
+    QLineEdit *rotate_2;
+    QGroupBox *groupBox_3;
+    QGridLayout *gridLayout_2;
+    QLabel *label_8;
     QLabel *label;
     QLabel *label_2;
-    QVBoxLayout *verticalLayout_2;
-    QLineEdit *refImageSize;
-    QLineEdit *senImageSize;
-    QLineEdit *ptpairsnum;
-    QLineEdit *registratetime;
-    QLineEdit *mse;
+    QLabel *label_3;
+    QLabel *label_7;
+    QLabel *label_9;
+    QLabel *label_6;
+    QLabel *label_4;
+    QLabel *label_5;
     QMenuBar *menuBar;
     QMenu *menu;
     QMenu *menu_3;
@@ -110,72 +128,159 @@ public:
         MapCtr4->setProperty("geometry", QVariant(QRect(0, 500, 681, 401)));
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName(QString::fromUtf8("groupBox"));
-        groupBox->setGeometry(QRect(730, 500, 251, 231));
+        groupBox->setGeometry(QRect(780, 490, 171, 301));
         gridLayout = new QGridLayout(groupBox);
         gridLayout->setSpacing(6);
         gridLayout->setContentsMargins(11, 11, 11, 11);
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        verticalLayout = new QVBoxLayout();
-        verticalLayout->setSpacing(6);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        label_3 = new QLabel(groupBox);
-        label_3->setObjectName(QString::fromUtf8("label_3"));
+        mse = new QLineEdit(groupBox);
+        mse->setObjectName(QString::fromUtf8("mse"));
 
-        verticalLayout->addWidget(label_3);
+        gridLayout->addWidget(mse, 8, 0, 1, 1);
 
-        label_4 = new QLabel(groupBox);
-        label_4->setObjectName(QString::fromUtf8("label_4"));
+        shift_y = new QLineEdit(groupBox);
+        shift_y->setObjectName(QString::fromUtf8("shift_y"));
 
-        verticalLayout->addWidget(label_4);
+        gridLayout->addWidget(shift_y, 10, 0, 1, 1);
 
-        label_5 = new QLabel(groupBox);
-        label_5->setObjectName(QString::fromUtf8("label_5"));
+        rotate = new QLineEdit(groupBox);
+        rotate->setObjectName(QString::fromUtf8("rotate"));
 
-        verticalLayout->addWidget(label_5);
+        gridLayout->addWidget(rotate, 12, 0, 1, 1);
 
-        label = new QLabel(groupBox);
-        label->setObjectName(QString::fromUtf8("label"));
+        shift_x = new QLineEdit(groupBox);
+        shift_x->setObjectName(QString::fromUtf8("shift_x"));
 
-        verticalLayout->addWidget(label);
+        gridLayout->addWidget(shift_x, 9, 0, 1, 1);
 
-        label_2 = new QLabel(groupBox);
-        label_2->setObjectName(QString::fromUtf8("label_2"));
-
-        verticalLayout->addWidget(label_2);
-
-
-        gridLayout->addLayout(verticalLayout, 0, 0, 1, 1);
-
-        verticalLayout_2 = new QVBoxLayout();
-        verticalLayout_2->setSpacing(6);
-        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         refImageSize = new QLineEdit(groupBox);
         refImageSize->setObjectName(QString::fromUtf8("refImageSize"));
 
-        verticalLayout_2->addWidget(refImageSize);
-
-        senImageSize = new QLineEdit(groupBox);
-        senImageSize->setObjectName(QString::fromUtf8("senImageSize"));
-
-        verticalLayout_2->addWidget(senImageSize);
+        gridLayout->addWidget(refImageSize, 0, 0, 1, 1);
 
         ptpairsnum = new QLineEdit(groupBox);
         ptpairsnum->setObjectName(QString::fromUtf8("ptpairsnum"));
 
-        verticalLayout_2->addWidget(ptpairsnum);
+        gridLayout->addWidget(ptpairsnum, 2, 0, 1, 1);
+
+        senImageSize = new QLineEdit(groupBox);
+        senImageSize->setObjectName(QString::fromUtf8("senImageSize"));
+
+        gridLayout->addWidget(senImageSize, 1, 0, 1, 1);
 
         registratetime = new QLineEdit(groupBox);
         registratetime->setObjectName(QString::fromUtf8("registratetime"));
 
-        verticalLayout_2->addWidget(registratetime);
+        gridLayout->addWidget(registratetime, 3, 0, 1, 1);
 
-        mse = new QLineEdit(groupBox);
-        mse->setObjectName(QString::fromUtf8("mse"));
+        scale = new QLineEdit(groupBox);
+        scale->setObjectName(QString::fromUtf8("scale"));
 
-        verticalLayout_2->addWidget(mse);
+        gridLayout->addWidget(scale, 11, 0, 1, 1);
 
+        groupBox_2 = new QGroupBox(centralWidget);
+        groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
+        groupBox_2->setGeometry(QRect(1060, 490, 181, 301));
+        gridLayout_3 = new QGridLayout(groupBox_2);
+        gridLayout_3->setSpacing(6);
+        gridLayout_3->setContentsMargins(11, 11, 11, 11);
+        gridLayout_3->setObjectName(QString::fromUtf8("gridLayout_3"));
+        refImageSize_2 = new QLineEdit(groupBox_2);
+        refImageSize_2->setObjectName(QString::fromUtf8("refImageSize_2"));
 
-        gridLayout->addLayout(verticalLayout_2, 0, 1, 1, 1);
+        gridLayout_3->addWidget(refImageSize_2, 0, 0, 1, 1);
+
+        senImageSize_2 = new QLineEdit(groupBox_2);
+        senImageSize_2->setObjectName(QString::fromUtf8("senImageSize_2"));
+
+        gridLayout_3->addWidget(senImageSize_2, 1, 0, 1, 1);
+
+        ptpairsnum_2 = new QLineEdit(groupBox_2);
+        ptpairsnum_2->setObjectName(QString::fromUtf8("ptpairsnum_2"));
+
+        gridLayout_3->addWidget(ptpairsnum_2, 2, 0, 1, 1);
+
+        registratetime_2 = new QLineEdit(groupBox_2);
+        registratetime_2->setObjectName(QString::fromUtf8("registratetime_2"));
+
+        gridLayout_3->addWidget(registratetime_2, 3, 0, 1, 1);
+
+        mse_2 = new QLineEdit(groupBox_2);
+        mse_2->setObjectName(QString::fromUtf8("mse_2"));
+
+        gridLayout_3->addWidget(mse_2, 4, 0, 1, 1);
+
+        shift_x_2 = new QLineEdit(groupBox_2);
+        shift_x_2->setObjectName(QString::fromUtf8("shift_x_2"));
+
+        gridLayout_3->addWidget(shift_x_2, 5, 0, 1, 1);
+
+        shift_y_2 = new QLineEdit(groupBox_2);
+        shift_y_2->setObjectName(QString::fromUtf8("shift_y_2"));
+
+        gridLayout_3->addWidget(shift_y_2, 6, 0, 1, 1);
+
+        scale_2 = new QLineEdit(groupBox_2);
+        scale_2->setObjectName(QString::fromUtf8("scale_2"));
+
+        gridLayout_3->addWidget(scale_2, 7, 0, 1, 1);
+
+        rotate_2 = new QLineEdit(groupBox_2);
+        rotate_2->setObjectName(QString::fromUtf8("rotate_2"));
+
+        gridLayout_3->addWidget(rotate_2, 8, 0, 1, 1);
+
+        groupBox_3 = new QGroupBox(centralWidget);
+        groupBox_3->setObjectName(QString::fromUtf8("groupBox_3"));
+        groupBox_3->setGeometry(QRect(950, 500, 111, 291));
+        gridLayout_2 = new QGridLayout(groupBox_3);
+        gridLayout_2->setSpacing(6);
+        gridLayout_2->setContentsMargins(11, 11, 11, 11);
+        gridLayout_2->setObjectName(QString::fromUtf8("gridLayout_2"));
+        label_8 = new QLabel(groupBox_3);
+        label_8->setObjectName(QString::fromUtf8("label_8"));
+
+        gridLayout_2->addWidget(label_8, 8, 0, 1, 1, Qt::AlignHCenter);
+
+        label = new QLabel(groupBox_3);
+        label->setObjectName(QString::fromUtf8("label"));
+
+        gridLayout_2->addWidget(label, 4, 0, 1, 1, Qt::AlignHCenter);
+
+        label_2 = new QLabel(groupBox_3);
+        label_2->setObjectName(QString::fromUtf8("label_2"));
+
+        gridLayout_2->addWidget(label_2, 5, 0, 1, 1, Qt::AlignHCenter);
+
+        label_3 = new QLabel(groupBox_3);
+        label_3->setObjectName(QString::fromUtf8("label_3"));
+
+        gridLayout_2->addWidget(label_3, 0, 0, 1, 1, Qt::AlignHCenter);
+
+        label_7 = new QLabel(groupBox_3);
+        label_7->setObjectName(QString::fromUtf8("label_7"));
+
+        gridLayout_2->addWidget(label_7, 7, 0, 1, 1, Qt::AlignHCenter);
+
+        label_9 = new QLabel(groupBox_3);
+        label_9->setObjectName(QString::fromUtf8("label_9"));
+
+        gridLayout_2->addWidget(label_9, 9, 0, 1, 1, Qt::AlignHCenter);
+
+        label_6 = new QLabel(groupBox_3);
+        label_6->setObjectName(QString::fromUtf8("label_6"));
+
+        gridLayout_2->addWidget(label_6, 6, 0, 1, 1, Qt::AlignHCenter);
+
+        label_4 = new QLabel(groupBox_3);
+        label_4->setObjectName(QString::fromUtf8("label_4"));
+
+        gridLayout_2->addWidget(label_4, 1, 0, 1, 1, Qt::AlignHCenter);
+
+        label_5 = new QLabel(groupBox_3);
+        label_5->setObjectName(QString::fromUtf8("label_5"));
+
+        gridLayout_2->addWidget(label_5, 3, 0, 1, 1, Qt::AlignHCenter);
 
         sy_2Class->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(sy_2Class);
@@ -212,12 +317,18 @@ public:
         action_4->setText(QApplication::translate("sy_2Class", "\346\211\223\345\274\200\345\217\202\350\200\203\345\233\276\345\203\217", 0, QApplication::UnicodeUTF8));
         action_5->setText(QApplication::translate("sy_2Class", "\346\211\223\345\274\200\345\276\205\351\205\215\345\207\206\345\233\276\345\203\217", 0, QApplication::UnicodeUTF8));
         action_6->setText(QApplication::translate("sy_2Class", "\346\270\205\351\231\244\346\225\260\346\215\256", 0, QApplication::UnicodeUTF8));
-        groupBox->setTitle(QApplication::translate("sy_2Class", "\345\244\247\345\271\205\351\235\242\345\233\276\345\203\217\345\214\271\351\205\215", 0, QApplication::UnicodeUTF8));
-        label_3->setText(QApplication::translate("sy_2Class", "\345\217\202\350\200\203\345\233\276\345\203\217\345\260\272\345\257\270", 0, QApplication::UnicodeUTF8));
-        label_4->setText(QApplication::translate("sy_2Class", "\345\276\205\351\205\215\345\207\206\345\233\276\345\203\217\345\260\272\345\257\270", 0, QApplication::UnicodeUTF8));
-        label_5->setText(QApplication::translate("sy_2Class", "\345\214\271\351\205\215\347\202\271\345\257\271", 0, QApplication::UnicodeUTF8));
+        groupBox->setTitle(QApplication::translate("sy_2Class", "\350\266\205\345\244\247\345\233\276\345\203\217\345\277\253\351\200\237\345\214\271\351\205\215\347\256\227\346\263\225", 0, QApplication::UnicodeUTF8));
+        groupBox_2->setTitle(QApplication::translate("sy_2Class", "\350\266\205\345\244\247\345\233\276\345\203\217\345\277\253\351\200\237\351\253\230\347\262\276\345\272\246\345\214\271\351\205\215\347\256\227\346\263\225", 0, QApplication::UnicodeUTF8));
+        groupBox_3->setTitle(QString());
+        label_8->setText(QApplication::translate("sy_2Class", "\347\274\251\346\224\276\346\257\224\344\276\213", 0, QApplication::UnicodeUTF8));
         label->setText(QApplication::translate("sy_2Class", "\347\256\227\346\263\225\346\227\266\351\227\264", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("sy_2Class", "\347\256\227\346\263\225\347\262\276\345\272\246", 0, QApplication::UnicodeUTF8));
+        label_3->setText(QApplication::translate("sy_2Class", "\345\217\202\350\200\203\345\233\276\345\203\217\345\260\272\345\257\270", 0, QApplication::UnicodeUTF8));
+        label_7->setText(QApplication::translate("sy_2Class", "\345\271\263\347\247\273\351\207\217-Y", 0, QApplication::UnicodeUTF8));
+        label_9->setText(QApplication::translate("sy_2Class", "\346\227\213\350\275\254\345\272\246\346\225\260", 0, QApplication::UnicodeUTF8));
+        label_6->setText(QApplication::translate("sy_2Class", "\345\271\263\347\247\273\351\207\217-X", 0, QApplication::UnicodeUTF8));
+        label_4->setText(QApplication::translate("sy_2Class", "\345\276\205\351\205\215\345\207\206\345\233\276\345\203\217\345\260\272\345\257\270", 0, QApplication::UnicodeUTF8));
+        label_5->setText(QApplication::translate("sy_2Class", "\345\214\271\351\205\215\347\202\271\345\257\271", 0, QApplication::UnicodeUTF8));
         menu->setTitle(QApplication::translate("sy_2Class", "\346\226\207\344\273\266", 0, QApplication::UnicodeUTF8));
         menu_3->setTitle(QApplication::translate("sy_2Class", "\346\211\223\345\274\200", 0, QApplication::UnicodeUTF8));
         menu_2->setTitle(QApplication::translate("sy_2Class", "\350\266\205\345\244\247\345\233\276\345\203\217\351\205\215\345\207\206", 0, QApplication::UnicodeUTF8));

@@ -97,11 +97,15 @@ public slots:
 	void BigMapRegistration(); ///大图配准
 	void OnClearMapLayer();//该函数用于清除Map控件中的图像，以便于显示其他图像
 	void AdBigMapRegistration();
+	void OnSpeed();//分块搜索算法
+	void OnSurfSpeed();//小图像单纯SURF算法
 private:
 	QAction *openAction1,*openAction2;
 	QAction *SurfAction;
 	QAction *DeleMapLayersAction;
 	QAction *BigMapSURFAction;
+	QAction *SImageSpeed;//分块搜索算法
+	QAction *SImageSurfSpeed;//小图像单纯SURF算法
 
 //	QAction *openBigMapResult;
 
