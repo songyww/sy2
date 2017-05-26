@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1440</width>
-    <height>967</height>
+    <height>972</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <widget class="QAxWidget" name="MapToolBarCtr1">
     <property name="geometry" stdset="0">
      <rect>
-      <x>0</x>
+      <x>20</x>
       <y>0</y>
       <width>681</width>
       <height>31</height>
@@ -27,7 +27,7 @@
    <widget class="QAxWidget" name="MapTocCtr1">
     <property name="geometry" stdset="0">
      <rect>
-      <x>0</x>
+      <x>20</x>
       <y>30</y>
       <width>101</width>
       <height>421</height>
@@ -37,7 +37,7 @@
    <widget class="QAxWidget" name="MapCtr1">
     <property name="geometry" stdset="0">
      <rect>
-      <x>100</x>
+      <x>120</x>
       <y>30</y>
       <width>581</width>
       <height>421</height>
@@ -47,7 +47,7 @@
    <widget class="QAxWidget" name="MapToolBarCtr2">
     <property name="geometry" stdset="0">
      <rect>
-      <x>750</x>
+      <x>740</x>
       <y>0</y>
       <width>681</width>
       <height>31</height>
@@ -57,7 +57,7 @@
    <widget class="QAxWidget" name="MapTocCtr2">
     <property name="geometry" stdset="0">
      <rect>
-      <x>750</x>
+      <x>740</x>
       <y>30</y>
       <width>101</width>
       <height>421</height>
@@ -67,7 +67,7 @@
    <widget class="QAxWidget" name="MapCtr2">
     <property name="geometry" stdset="0">
      <rect>
-      <x>850</x>
+      <x>840</x>
       <y>30</y>
       <width>581</width>
       <height>421</height>
@@ -77,7 +77,7 @@
    <widget class="QAxWidget" name="MapToolBarCtr4">
     <property name="geometry" stdset="0">
      <rect>
-      <x>0</x>
+      <x>20</x>
       <y>470</y>
       <width>681</width>
       <height>31</height>
@@ -87,7 +87,7 @@
    <widget class="QAxWidget" name="MapCtr4">
     <property name="geometry" stdset="0">
      <rect>
-      <x>0</x>
+      <x>20</x>
       <y>500</y>
       <width>681</width>
       <height>401</height>
@@ -97,7 +97,7 @@
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>780</x>
+      <x>800</x>
       <y>490</y>
       <width>171</width>
       <height>301</height>
@@ -139,7 +139,7 @@
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
-      <x>1060</x>
+      <x>1080</x>
       <y>490</y>
       <width>181</width>
       <height>301</height>
@@ -181,7 +181,7 @@
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
-      <x>950</x>
+      <x>970</x>
       <y>500</y>
       <width>111</width>
       <height>291</height>
@@ -255,6 +255,32 @@
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>800</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>1130</x>
+      <y>800</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
