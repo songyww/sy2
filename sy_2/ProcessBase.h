@@ -12,7 +12,15 @@
 using namespace std;
 #pragma warning(disable: 4996)
 #include <cstring>
-
+#include <qstring.h>
+#include <QtGui/QMessageBox>
+#include <QAction>
+#include <QMenuBar>
+#include <QStatusBar>
+#include <QUuid>
+#include <qmessagebox.h>
+#include <qfiledialog.h>
+#include <QTextCodec>///解决qt中文乱码时需要添加的头文件
 /*
  *	@brief Process类中提供进度条基类接口，用于反映当前算法的进度值
  */

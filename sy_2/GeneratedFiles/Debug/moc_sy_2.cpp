@@ -22,7 +22,7 @@ static const uint qt_meta_data_sy_2[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       6,   14, // methods
+      11,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -30,21 +30,28 @@ static const uint qt_meta_data_sy_2[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-       6,    5,    5,    5, 0x0a,
-      18,    5,    5,    5, 0x0a,
-      43,   30,    5,    5, 0x0a,
-      67,    5,    5,    5, 0x0a,
-      88,    5,    5,    5, 0x0a,
-     106,    5,    5,    5, 0x0a,
+      11,    5,    6,    5, 0x08,
+      23,    5,    6,    5, 0x08,
+      35,    5,    6,    5, 0x08,
+      47,    5,    6,    5, 0x08,
+      72,   59,    5,    5, 0x08,
+      96,    5,    5,    5, 0x08,
+     117,    5,    5,    5, 0x08,
+     135,    5,    5,    5, 0x08,
+     158,    5,    5,    5, 0x08,
+     171,    5,    5,    5, 0x08,
+     187,   59,    5,    5, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_sy_2[] = {
-    "sy_2\0\0OpenFile1()\0OpenFile2()\0"
-    "DstImagePath\0OpenResultFile1(string)\0"
-    "BigMapRegistration()\0OnClearMapLayer()\0"
-    "AdBigMapRegistration()\0"
+    "sy_2\0\0bool\0OpenFile1()\0OpenFile2()\0"
+    "OpenFile3()\0OpenFile4()\0DstImagePath\0"
+    "OpenResultFile1(string)\0BigMapRegistration()\0"
+    "OnClearMapLayer()\0AdBigMapRegistration()\0"
+    "DSurfSpeed()\0FenKuai_DSURF()\0"
+    "OpenResultFile2(string)\0"
 };
 
 void sy_2::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -53,12 +60,21 @@ void sy_2::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void *
         Q_ASSERT(staticMetaObject.cast(_o));
         sy_2 *_t = static_cast<sy_2 *>(_o);
         switch (_id) {
-        case 0: _t->OpenFile1(); break;
-        case 1: _t->OpenFile2(); break;
-        case 2: _t->OpenResultFile1((*reinterpret_cast< string(*)>(_a[1]))); break;
-        case 3: _t->BigMapRegistration(); break;
-        case 4: _t->OnClearMapLayer(); break;
-        case 5: _t->AdBigMapRegistration(); break;
+        case 0: { bool _r = _t->OpenFile1();
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
+        case 1: { bool _r = _t->OpenFile2();
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
+        case 2: { bool _r = _t->OpenFile3();
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
+        case 3: { bool _r = _t->OpenFile4();
+            if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = _r; }  break;
+        case 4: _t->OpenResultFile1((*reinterpret_cast< string(*)>(_a[1]))); break;
+        case 5: _t->BigMapRegistration(); break;
+        case 6: _t->OnClearMapLayer(); break;
+        case 7: _t->AdBigMapRegistration(); break;
+        case 8: _t->DSurfSpeed(); break;
+        case 9: _t->FenKuai_DSURF(); break;
+        case 10: _t->OpenResultFile2((*reinterpret_cast< string(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -96,9 +112,9 @@ int sy_2::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 11)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 11;
     }
     return _id;
 }

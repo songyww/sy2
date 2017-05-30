@@ -40,7 +40,7 @@
 
 /*****使用CSrting时需要用到的头文件*****/
 #include <atlstr.h>
-
+#include "ximage.h"
 
 //特征匹配类型--不懂具体意思
 enum feature_match_type
@@ -97,6 +97,23 @@ double GetRMSE3(vector<int> ptpairs,CvSeq* CurrentKeypoints,CvSeq* PreKeypoints,
 
 CvPoint2D32f persp_xform_pt3( CvPoint2D32f pt, CvMat* T );
 
+bool ColorSplit(CxImage m_img);
+bool CuveSplit(CxImage m_img);
+bool ShapeSplit(CxImage m_img);
+void Canny(unsigned char *pUnchImage, int nWidth, int nHeight, double sigma, double dRatioLow, double dRatioHigh, unsigned char *pUnchEdge);
+void GaussianSmooth(unsigned char *pUnchImg, int nWidth, int nHeight, 
+	double sigma, unsigned char * pUnchSmthdImg);
 
+void NonmaxSuppress(int *pnMag, int *pnGradX, int *pnGradY, int nWidth, 
+	int nHeight, unsigned char *pUnchRst);
+void TraceEdge (int y, int x, int nLowThd, unsigned char *pUnchEdge, int *pnMag, int nWidth) ;
 
+void GradMagnitude(int *pnGradX, int *pnGradY, int nWidth, int nHeight, int *pnMag);
+void Hysteresis(int *pnMag, int nWidth, int nHeight, double dRatioLow, 
+	double dRatioHigh, unsigned char *pUnchEdge);
+void MakeGauss(double sigma, double **pdKernel, int *pnWindowSize);
+void EstimateThreshold(int *pnMag, int nWidth, int nHeight, int *pnThdHigh,int *pnThdLow, 
+	unsigned char * pUnchEdge, double dRatioHigh, double dRationLow);
+void DirGrad(unsigned char *pUnchSmthdImg, int nWidth, int nHeight,
+	int *pnGradX , int *pnGradY);
 #endif

@@ -57,11 +57,13 @@ public:
 
 	//该函数用于将文件数据读入数据集汇总，并检查文件是否存在金字塔
 	bool CheckPyramid( );
-
+	//对于小图像仍然要建立金字塔的情况，使用该函数
+	bool sCheckPyramid();
 
 	//该函数实现GDAL构建金字塔
 	bool CreatePyramid();
-
+	//对小图构建金字塔，相比上一函数只修改顶层金字塔大小
+	bool sCreatePyramid();
 
 	//定义用于读取金字塔某一层的函数，以及读取时的图像块的设置；m:将图像分m次；n表示读取第几层金字塔
 	void ReadPyramidFile(int m, int n, char * filepath);

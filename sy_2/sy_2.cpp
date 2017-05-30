@@ -3,6 +3,8 @@
 #include <direct.h>  
 #include <io.h>  
 #include <Windows.h>  
+#include <QUuid>
+#include "ximage.h"
 
 //******保存配准时的图像路径*****///
 vector<IplImage*>img;
@@ -17,6 +19,7 @@ vector<string> refLayer;
 vector<string> senLayer;
 vector<string> refOverlap;
 vector<string> senOverlap;
+vector<string> fenImage;
 //vector<char*> iImageSize;//refImageSize[0]=参考图像尺寸; refImageSize[1] = 待配准图像尺寸
 //vector<char*> senImageSize;//senImageSize[0]=width; senImageSize[1] = height
 
@@ -40,7 +43,34 @@ int FileOpenFlag1 ;
 int FileOpenFlag2 ;
 using namespace std;
 using namespace cv;
+int iLayer1 = 0;
+int iLayer2 = 0;
 
+static int flag1=0,flag2=0;
+int flag11=0,flag22=0;
+double ww,hh;    //小块图像的宽度和高度
+int h0;
+int w0;
+
+double ColorPow;
+double CuvePow;
+double ShapePow;
+
+//extern 
+double	m_ColorPow;
+//extern 
+double	m_CuvePow;
+//extern 
+double	m_ShapePow;
+vector<double> xishu;
+vector<QString> lujing;
+#define min1(a,b)            (((a) < (b)) ? (a) : (b))
+#define max1(a,b)            (((a) > (b)) ? (a) : (b))
+int m_KeyMainColorSig[111]; // 查询小图像的特征
+double m_KeyCuve[15];
+double m_KeyShape[8];
+int m_Color[111];//检索图像特征
+double m_Cuve[15],m_Shape[8];
 sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
@@ -58,7 +88,7 @@ sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 
 	ui.MapTocCtr1->setControl("{A0F9A9A2-4A3F-4888-826F-CA2BFA23CF17}");
 	ui.MapTocCtr2->setControl("{A0F9A9A2-4A3F-4888-826F-CA2BFA23CF17}");
-
+	ui.MapTocCtr4->setControl("{A0F9A9A2-4A3F-4888-826F-CA2BFA23CF17}");
 
 
 
@@ -76,6 +106,7 @@ sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 
 	ui.MapTocCtr1->queryInterface(QUuid(IID_ITOCControl),(void**)&m_pTOCControl1);
 	ui.MapTocCtr2->queryInterface(QUuid(IID_ITOCControl),(void**)&m_pTOCControl2);
+	ui.MapTocCtr4->queryInterface(QUuid(IID_ITOCControl),(void**)&m_pTOCControl4);
 
 	//将工具条和控件相关联
 	//Map控件
@@ -86,13 +117,66 @@ sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 
 	m_pTOCControl1->SetBuddyControl(m_pMapControl1);
 	m_pTOCControl2->SetBuddyControl(m_pMapControl2);
-
+	m_pTOCControl4->SetBuddyControl(m_pMapControl4);
 	//调用增加工具条函数
 
 	AddMapToolBarCtr(m_pToolbarControl1);//map
 	AddMapToolBarCtr(m_pToolbarControl2);//map
 	//	AddMapToolBarCtr(m_pToolbarControl3);//map
 	AddMapToolBarCtr(m_pToolbarControl4);//map
+
+	//Map控件设置
+	ui.MapCtr1_2->setControl("{C552EA94-6FBB-11d5-A9C1-00104BB6FC1C}");
+	ui.MapToolBarCtr1_2->setControl("{B7D4358E-3CBC-11D6-AA09-00104BB6FC1C}");
+	ui.MapCtr2_2->setControl("{C552EA94-6FBB-11d5-A9C1-00104BB6FC1C}");
+	ui.MapToolBarCtr2_2->setControl("{B7D4358E-3CBC-11D6-AA09-00104BB6FC1C}");
+	//	ui.MapCtr3->setControl("{C552EA94-6FBB-11d5-A9C1-00104BB6FC1C}");
+	//	ui.MapToolBarCtr3->setControl("{B7D4358E-3CBC-11D6-AA09-00104BB6FC1C}");
+	ui.MapCtr4_2->setControl("{C552EA94-6FBB-11d5-A9C1-00104BB6FC1C}");
+	ui.MapToolBarCtr4_2->setControl("{B7D4358E-3CBC-11D6-AA09-00104BB6FC1C}");
+
+	ui.MapTocCtr1_2->setControl("{A0F9A9A2-4A3F-4888-826F-CA2BFA23CF17}");
+	ui.MapTocCtr2_2->setControl("{A0F9A9A2-4A3F-4888-826F-CA2BFA23CF17}");
+	ui.MapTocCtr4_2->setControl("{A0F9A9A2-4A3F-4888-826F-CA2BFA23CF17}");
+
+	connect(ui.pushButton,SIGNAL(clicked()),this,SLOT(OpenFile1()));
+	connect(ui.pushButton_2,SIGNAL(clicked()),this,SLOT(OpenFile2()));
+
+	//将ui界面的控件和定义的指针关联
+	//Map控件
+	ui.MapToolBarCtr1_2->queryInterface(QUuid(IID_IToolbarControl),(void**)&m_pToolbarControl1_2);
+	ui.MapCtr1_2->queryInterface(QUuid(IID_IMapControl3),(void**)&m_pMapControl1_2);
+	ui.MapToolBarCtr2_2->queryInterface(QUuid(IID_IToolbarControl),(void**)&m_pToolbarControl2_2);
+	ui.MapCtr2_2->queryInterface(QUuid(IID_IMapControl3),(void**)&m_pMapControl2_2);
+	//	ui.MapToolBarCtr3->queryInterface(QUuid(IID_IToolbarControl),(void**)&m_pToolbarControl3);
+	//	ui.MapCtr3->queryInterface(QUuid(IID_IMapControl3),(void**)&m_pMapControl3);
+	ui.MapToolBarCtr4_2->queryInterface(QUuid(IID_IToolbarControl),(void**)&m_pToolbarControl4_2);
+	ui.MapCtr4_2->queryInterface(QUuid(IID_IMapControl3),(void**)&m_pMapControl4_2);
+
+
+	ui.MapTocCtr1_2->queryInterface(QUuid(IID_ITOCControl),(void**)&m_pTOCControl1_2);
+	ui.MapTocCtr2_2->queryInterface(QUuid(IID_ITOCControl),(void**)&m_pTOCControl2_2);
+	ui.MapTocCtr4_2->queryInterface(QUuid(IID_ITOCControl),(void**)&m_pTOCControl4_2);
+	//将工具条和控件相关联
+	//Map控件
+	m_pToolbarControl1_2->SetBuddyControl(m_pMapControl1_2);
+	m_pToolbarControl2_2->SetBuddyControl(m_pMapControl2_2);
+	//	m_pToolbarControl3->SetBuddyControl(m_pMapControl3);
+	m_pToolbarControl4_2->SetBuddyControl(m_pMapControl4_2);
+
+	m_pTOCControl1_2->SetBuddyControl(m_pMapControl1_2);
+	m_pTOCControl2_2->SetBuddyControl(m_pMapControl2_2);
+	m_pTOCControl4_2->SetBuddyControl(m_pMapControl4_2);
+	//调用增加工具条函数
+
+	AddMapToolBarCtr(m_pToolbarControl1_2);//map
+	AddMapToolBarCtr(m_pToolbarControl2_2);//map
+	//	AddMapToolBarCtr(m_pToolbarControl3);//map
+	AddMapToolBarCtr(m_pToolbarControl4_2);//map
+
+	connect(ui.pushButton_3,SIGNAL(clicked()),this,SLOT(OpenFile3()));
+	connect(ui.pushButton_4,SIGNAL(clicked()),this,SLOT(OpenFile4()));
+
 
 	//对菜单栏中打开图像的操作进行设置
 	//第一步：设置动作
@@ -106,14 +190,23 @@ sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 	BigMapSURFAction->setStatusTip(tr("Advanced SURF Registration"));
 	DeleMapLayersAction = new QAction( QIcon(":/image/doc-close"),tr("&清除所有数据"),this);
 	DeleMapLayersAction->setStatusTip(tr("Clear all Datas"));
-
-
+	DSurfAction = new QAction( QIcon("tree"), tr("&快速定位算法"), this );
+	DSurfAction->setStatusTip(tr("SURF Registration"));//同上
+	DSFenKuaiAction = new QAction( QIcon("tree"), tr("&分块算法"), this );
+	DSFenKuaiAction->setStatusTip(tr("SURF Registration"));//同上
 	//第二步：将动作与函数相关联，形成信号-槽机制
 	connect(openAction1, SIGNAL(triggered()), this, SLOT(OpenFile1()));
 	connect(openAction2, SIGNAL(triggered()), this, SLOT(OpenFile2()));
 	connect(BigMapSURFAction,SIGNAL(triggered()), this, SLOT(AdBigMapRegistration()));
 	connect(SurfAction, SIGNAL(triggered()), this, SLOT(BigMapRegistration()));
 	connect(DeleMapLayersAction,SIGNAL(triggered()), this, SLOT(OnClearMapLayer()));
+	connect(DSurfAction,SIGNAL(triggered()), this, SLOT(DSurfSpeed()));
+	connect(DSFenKuaiAction,SIGNAL(triggered()), this, SLOT(FenKuai_DSURF()));
+
+	connect(ui.pushButton_6,SIGNAL(clicked()), this, SLOT(AdBigMapRegistration()));
+	connect(ui.pushButton_5, SIGNAL(clicked()), this, SLOT(BigMapRegistration()));
+	connect(ui.pushButton_8,SIGNAL(clicked()), this, SLOT(DSurfSpeed()));
+	connect(ui.pushButton_7,SIGNAL(clicked()), this, SLOT(FenKuai_DSURF()));
 
 	//第三步：在菜单栏相应地方，添加动作
 	ui.menu_3->addAction(openAction1);
@@ -123,6 +216,18 @@ sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 	ui.menu->addAction(DeleMapLayersAction);
 	FileOpenFlag1 = 0;
 	FileOpenFlag2 = 0;
+	ui.pushButton->addAction(openAction1);
+	ui.pushButton_2->addAction(openAction2);
+	ui.menu_4->addAction(DSFenKuaiAction);
+	ui.menu_4->addAction(DSurfAction);
+//	init_UI();
+//	FirstAction = new QAction(QIcon("tree"),tr("&First"),this);
+//	connect(FirstAction,SIGNAL(triggered()),this,SLOT(on_actionFirst_triggered()));
+//	ui.menu_4->addAction(FirstAction);
+
+
+
+
 }
 
 sy_2::~sy_2()
@@ -170,9 +275,9 @@ void sy_2::AddMapToolBarCtr(IToolbarControlPtr pToolbar)
 }
 
 
-
-void sy_2::OpenFile1()
+bool sy_2::OpenFile1()
 {
+	GDALAllRegister();
 	FileOpenFlag1 = 1;
 	PyramidBase pyramid1; 
 	refImg.clear();
@@ -181,28 +286,41 @@ void sy_2::OpenFile1()
 	String reImg_full,reImg_path;	//reimg_full:图像的完整路径；reimg_path：图像所在文件夹路径
 
 	QFileInfo fi;		  
-	file_full1 = QFileDialog::getOpenFileName(this,"open the second picture",file_path1);  
+	file_full1 = QFileDialog::getOpenFileName(this,"open the first picture",file_path1);  
 	fi = QFileInfo(file_full1);  
 	m_strFileName1=fi.absoluteFilePath();
 
 	reImg_full = m_strFileName1.toStdString();////QString 转换为string///图像完整路径
 	int po = reImg_full.find_last_of('/');
 	reImg_path = reImg_full.substr( 0,po+1); ///文件夹路径
-	
+	//string filename = reImg_full.substr(po+1,reImg_full.length());
+	//if (filename.length() < 1)
+//	{
+//		QMessageBox::information(this, tr("Information"),tr("打开图像失败，请选择正确路径！"));
+//	}
 	//将参考图像所在文件夹路径以及图像路径存放入路径容器
+
+	
 	refImg.push_back(reImg_path);//refImg[0]:参考图像所在文件夹路径
 	refImg.push_back(reImg_full);//refImg[1]:参考图像完整路径
 	
 	//将参考图像保存入金字塔构建的路径中
 	pyramid1.InFilePath = reImg_full.c_str();	//参考图像完整路径
 	pyramid1.FilePath = reImg_path.c_str();		//参考图像所在文件夹路径
+	
+	pyramid1.InFile = (GDALDataset*)GDALOpen(pyramid1.InFilePath, GA_ReadOnly);		//将路径中的文件读入到数据集中
+	if (pyramid1.InFile == NULL)
+	{
+		QMessageBox::information(this, tr("Information"),tr("打开图像失败，请选择正确路径！"));
+		return false;
+	}
 	pyramid1.CheckPyramid();
 	refLayer.clear();
 	char rsize[1024];
 	sprintf(rsize,"%d*%d",pyramid1.iWidth,pyramid1.iHeight);
 	QString rsize1 = QString::fromUtf8(rsize);
 	ui.refImageSize->setText(rsize1);
-	
+	ui.refImageSize_2->setText(rsize1);
 
 	char dir[1024];
 	sprintf(dir,"%s%s",pyramid1.FilePath,"refPyramidLayers");//filepath:金字塔层所在文件夹
@@ -242,7 +360,10 @@ void sy_2::OpenFile1()
 
 	if(FAILED(hr))
 
-		return;
+	{
+		
+		return false;
+	}
 
 	ILayerPtr pLyr(pRasterLy);
 
@@ -260,13 +381,13 @@ void sy_2::OpenFile1()
 		FileOpenFlag1 = 3;
 	else
 		FileOpenFlag1 = 4;
-
+	return true;
 
 }
 
-void sy_2::OpenFile2()
+bool sy_2::OpenFile2()
 {
-	
+	GDALAllRegister();
 	PyramidBase pyramid2; 
 	senImg.clear();
 	senLayer.clear();
@@ -290,12 +411,20 @@ void sy_2::OpenFile2()
 	/*将待配准图像路径传递给金字塔类*/
 	pyramid2.InFilePath = sen_full.c_str();	//待配准图像完整路径
 	pyramid2.FilePath = sen_path.c_str();	//待配准图像文件夹路径
+
+	pyramid2.InFile = (GDALDataset*)GDALOpen(pyramid2.InFilePath, GA_ReadOnly);		//将路径中的文件读入到数据集中
+	if (pyramid2.InFile == NULL)
+	{
+		QMessageBox::information(this, tr("Information"),tr("打开图像失败，请选择正确路径！"));
+		return false;
+	}
+
 	pyramid2.CheckPyramid();
 	char rsize[1024];
 	sprintf(rsize,"%d*%d",pyramid2.iWidth,pyramid2.iHeight);
 	QString rsize2 = QString::fromUtf8(rsize);
 	ui.senImageSize->setText(rsize2);
-
+	ui.senImageSize_2->setText(rsize2);
 
 	char dir[1024];
 	sprintf(dir,"%s%s",pyramid2.FilePath,"senPyramidLayers");//filepath:金字塔层所在文件夹
@@ -335,9 +464,10 @@ void sy_2::OpenFile2()
 	hr=pRasterLy->CreateFromFilePath(bstr_str);
 
 	if(FAILED(hr))
-
-		return;
-
+	{
+		QMessageBox::information(this, tr("Information"),tr("打开图像失败，请选择正确路径！"));
+		return false;
+	}
 	ILayerPtr pLyr(pRasterLy);
 
 	m_pMapControl2->AddLayer(pLyr,0);
@@ -374,6 +504,200 @@ void sy_2::OpenFile2()
 
 	}
 
+	return true;
+
+}
+
+
+bool sy_2::OpenFile3()
+{
+	GDALAllRegister();
+	FileOpenFlag1 = 1;
+	PyramidBase pyramid3; 
+	refImg.clear();
+	QString file_full1,file_name1,m_strFileName1;
+	QString file_path1 = NULL;
+	String reImg_full,reImg_path;	//reimg_full:图像的完整路径；reimg_path：图像所在文件夹路径
+
+	QFileInfo fi;		  
+	file_full1 = QFileDialog::getOpenFileName(this,"open the second picture",file_path1);  
+	fi = QFileInfo(file_full1);  
+	m_strFileName1=fi.absoluteFilePath();
+
+	reImg_full = m_strFileName1.toStdString();////QString 转换为string///图像完整路径
+	int po = reImg_full.find_last_of('/');
+	reImg_path = reImg_full.substr( 0,po+1); ///文件夹路径
+
+	//将参考图像所在文件夹路径以及图像路径存放入路径容器
+	refImg.push_back(reImg_path);//refImg[0]:参考图像所在文件夹路径
+	refImg.push_back(reImg_full);//refImg[1]:参考图像完整路径
+
+	//将参考图像保存入金字塔构建的路径中
+	pyramid3.InFilePath = reImg_full.c_str();	//参考图像完整路径
+	pyramid3.FilePath = reImg_path.c_str();		//参考图像所在文件夹路径
+
+	pyramid3.InFile = (GDALDataset*)GDALOpen(pyramid3.InFilePath, GA_ReadOnly);		//将路径中的文件读入到数据集中
+	if (pyramid3.InFile == NULL)
+	{
+		QMessageBox::information(this, tr("Information"),tr("打开图像失败，请选择正确路径！"));
+		return false;
+	}
+
+	pyramid3.sCheckPyramid();
+	refLayer.clear();
+	char dir[1024];
+	sprintf(dir,"%s%s",pyramid3.FilePath,"senPyramidLayers");//filepath:金字塔层所在文件夹
+	//判断该文件夹是否存在，若存在，则不用重新建立；若不存在，则创建该文件夹
+	if(_access(dir, 0) != -1)  
+	{  
+		cout << "文件夹已存在" <<endl;  
+		//system("pause");
+	}  
+	else  
+	{  
+		cout << "文件夹不存在，创建文件夹" << endl;  
+		_mkdir(dir); 
+		//system("pause");
+	} 
+	pyramid3.LayerPath = dir;
+	refLayer.push_back(dir);		//refLayer[0]:参考图像金字塔文件夹路径
+
+	for (int i = 0;i < pyramid3.iOverViewCount; i++)
+	{
+
+		char filepath[1024] = "";			//filepath[1024]:用以保存函数返回的金字塔每一层图像路径
+		pyramid3.SaveSingleBand(i,filepath);//,pyramid1.InFile);
+		refLayer.push_back(filepath);	//refLayer[i+1]:参考图像金字塔第i层图像路径；其中refLayer[1]保存第0层(原图像素的1/4 * 1/4)
+	}
+
+	char rsize[1024];
+	sprintf(rsize,"%d*%d",pyramid3.iWidth,pyramid3.iHeight);
+	QString rsize1 = QString::fromUtf8(rsize);
+	ui.refImageSize_3->setText(rsize1);
+	ui.refImageSize_4->setText(rsize1);
+
+
+	/*Map控件显示参考图像*/
+	BSTR bstr_str;
+
+	bstr_str = SysAllocString(m_strFileName1.utf16());
+
+	HRESULT hr;
+
+	IRasterLayerPtr pRasterLy(CLSID_RasterLayer);
+
+	hr=pRasterLy->CreateFromFilePath(bstr_str);
+
+	if(FAILED(hr))
+
+	{
+		QMessageBox::information(this, tr("Information"),tr("打开图像失败，请选择正确路径！"));
+		return false;
+	}
+
+	ILayerPtr pLyr(pRasterLy);
+
+	m_pMapControl1_2->AddLayer(pLyr,0);
+
+	IActiveViewPtr pActiveView(m_pMapControl1_2);
+
+	m_pMapControl1_2->Refresh(esriViewAll);  
+	return true;
+}
+
+bool sy_2::OpenFile4()
+{
+	GDALAllRegister();
+	FileOpenFlag1 = 1;
+	PyramidBase pyramid4; 
+	senImg.clear();
+	QString file_full1,file_name1,m_strFileName1;
+	QString file_path1 = NULL;
+	String senImg_full,senImg_path;	//reimg_full:图像的完整路径；reimg_path：图像所在文件夹路径
+
+	QFileInfo fi;		  
+	file_full1 = QFileDialog::getOpenFileName(this,"open the second picture",file_path1);  
+	fi = QFileInfo(file_full1);  
+	m_strFileName1=fi.absoluteFilePath();
+
+	senImg_full = m_strFileName1.toStdString();////QString 转换为string///图像完整路径
+	int po = senImg_full.find_last_of('/');
+	senImg_path = senImg_full.substr( 0,po+1); ///文件夹路径
+
+	//将参考图像所在文件夹路径以及图像路径存放入路径容器
+	senImg.push_back(senImg_path);//refImg[0]:参考图像所在文件夹路径
+	senImg.push_back(senImg_full);//refImg[1]:参考图像完整路径
+
+	//将参考图像保存入金字塔构建的路径中
+	pyramid4.InFilePath = senImg_full.c_str();	//参考图像完整路径
+	pyramid4.FilePath = senImg_path.c_str();		//参考图像所在文件夹路径
+
+	pyramid4.InFile = (GDALDataset*)GDALOpen(pyramid4.InFilePath, GA_ReadOnly);		//将路径中的文件读入到数据集中
+	if (pyramid4.InFile == NULL)
+	{
+		QMessageBox::information(this, tr("Information"),tr("打开图像失败，请选择正确路径！"));
+		return false;
+	}
+
+	pyramid4.sCheckPyramid();
+	senLayer.clear();
+	char dir[1024];
+	sprintf(dir,"%s%s",pyramid4.FilePath,"senPyramidLayers");//filepath:金字塔层所在文件夹
+	//判断该文件夹是否存在，若存在，则不用重新建立；若不存在，则创建该文件夹
+	if(_access(dir, 0) != -1)  
+	{  
+		cout << "文件夹已存在" <<endl;  
+		//system("pause");
+	}  
+	else  
+	{  
+		cout << "文件夹不存在，创建文件夹" << endl;  
+		_mkdir(dir); 
+		//system("pause");
+	} 
+	pyramid4.LayerPath = dir;
+	senLayer.push_back(dir);		//refLayer[0]:参考图像金字塔文件夹路径
+
+	for (int i = 0;i < pyramid4.iOverViewCount; i++)
+	{
+
+		char filepath[1024] = "";			//filepath[1024]:用以保存函数返回的金字塔每一层图像路径
+		pyramid4.SaveSingleBand(i,filepath);//,pyramid1.InFile);
+		senLayer.push_back(filepath);	//refLayer[i+1]:参考图像金字塔第i层图像路径；其中refLayer[1]保存第0层(原图像素的1/4 * 1/4)
+	}
+	char rsize[1024];
+	sprintf(rsize,"%d*%d",pyramid4.iWidth,pyramid4.iHeight);
+	QString rsize1 = QString::fromUtf8(rsize);
+	ui.senImageSize_3->setText(rsize1);
+	ui.senImageSize_4->setText(rsize1);
+
+
+	/*Map控件显示参考图像*/
+	BSTR bstr_str;
+
+	bstr_str = SysAllocString(m_strFileName1.utf16());
+
+	HRESULT hr;
+
+	IRasterLayerPtr pRasterLy(CLSID_RasterLayer);
+
+	hr=pRasterLy->CreateFromFilePath(bstr_str);
+
+	if(FAILED(hr))
+
+	{
+		QMessageBox::information(this, tr("Information"),tr("打开图像失败，请选择正确路径！"));
+		return false;
+	}
+
+	ILayerPtr pLyr(pRasterLy);
+
+	m_pMapControl2_2->AddLayer(pLyr,0);
+
+	IActiveViewPtr pActiveView(m_pMapControl2_2);
+
+	m_pMapControl2_2->Refresh(esriViewAll);  
+	return true;
 }
 
 
@@ -420,7 +744,8 @@ void sy_2::BigMapRegistration()
 	///
 	int i = 1;
 	string reImage,senImage;//这三个量分别用于临时存储用以匹配的图像路径，并传递给图像配准的函数
-	for ( i; i ++ ; i < refLayer.size())
+	double t_read=(double)cvGetTickCount();//开始计时
+	for ( i; i < refLayer.size();i ++ )
 	{
 		
 		IplImage * image = cvLoadImage(refLayer[i].c_str());
@@ -433,6 +758,8 @@ void sy_2::BigMapRegistration()
 		}
 
 	}
+
+	t_read = (double)(cvGetTickCount()-t_read)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 	SURF_ON_TWO(reImage,senImage,sImageResultPath);//调取金字塔中像素数小于1000的图像进行匹配
 	cv::initModule_nonfree();
 	CvMat* H;
@@ -440,9 +767,7 @@ void sy_2::BigMapRegistration()
 	CvMat* H1=&h;
 	double a[9];
 	double px,py;
-	double sfx,sfy;
-
-	double R11,R12,R21,R22,R13,R23,R33;
+	double sfx,sfy,rotate;
 	vector<int>ptpairs1;
 	if (i == 1)
 	{
@@ -481,7 +806,6 @@ void sy_2::BigMapRegistration()
 		//下面两句根据裁剪出的待配准图像中的小图在参考图像中的位置，计算出待配准图像的原图的左上角坐标在参考图像坐标系中的位置（或者说是待配准图像左上角顶点的平移量）
 		bighx = smallhx - senPoint[0].x;
 		bighy = smallhy - senPoint[0].y;
-
 		int h1 = abs(bighx) + 0.5;
 		int h2 = abs(bighy) + 0.5;
 		//对大图间的变换矩阵中的平移量进行更新
@@ -489,6 +813,29 @@ void sy_2::BigMapRegistration()
 		cvmSet(H1,0,2,bighx);
 		cvmSet(H1,1,2,bighy);
 		t2=(double)(cvGetTickCount()-t2)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		
+		double h11,h12,h21,h22;
+		
+		h11 = cvmGet(H1,0,0);
+		h12 = cvmGet(H1,0,1);
+		h21 = cvmGet(H1,1,0);
+		h22 = cvmGet(H1,1,1);
+		sfx = cvSqrt(h11*h11+h21*h21);
+		sfy = cvSqrt(h22*h22+h12*h12);
+		rotate = (180*atan(h21/h11))/3.1415;
+
+		QString sbighx = QString::number(bighx,'g',6);
+		ui.shift_x->setText(sbighx);
+		QString sbighy = QString::number(bighy,'g',6);
+		ui.shift_y->setText(sbighy);
+		QString iscale1 = QString::number(sfx,'g',6);
+		QString iscale2 = QString::number(sfy,'g',6);
+		QString iscale = iscale1+"/"+iscale2;
+		ui.scale->setText(iscale);
+		QString srotate = QString::number(rotate,'g',6);
+		ui.rotate->setText(srotate);
+		
+		
 		//得到变换参数之后，下面就要建立一个新的更大的图，用以存储两个大图配准的结果
 
 		//ResultImagePath.push_back(BigMapResult);
@@ -739,6 +1086,42 @@ void sy_2::OpenResultFile1(string DstImagePath)
 	//	QMessageBox::information(this, tr("Information"),tr("宋蕴"));
 }
 
+void sy_2::OpenResultFile2(string DstImagePath)
+{
+	GDALAllRegister();
+	PyramidBase pyramid1; 
+	pyramid1.InFilePath = DstImagePath.c_str(); 
+	//pyramid1.FilePath = resultImg[0].c_str();
+	pyramid1.InFile = (GDALDataset*)GDALOpen(pyramid1.InFilePath, GA_ReadOnly);
+	pyramid1.sCheckPyramid();
+
+	BSTR bstr_str = _bstr_t(DstImagePath.c_str());
+
+
+	//bstr_str = SysAllocString(m_strFileName2.utf16());
+
+	HRESULT hr;
+
+	IRasterLayerPtr pRasterLy(CLSID_RasterLayer);
+
+	hr=pRasterLy->CreateFromFilePath(bstr_str);
+
+	if(FAILED(hr))
+
+		return;
+
+	ILayerPtr pLyr(pRasterLy);
+
+	m_pMapControl4_2->AddLayer(pLyr,0);
+
+	IActiveViewPtr pActiveView(m_pMapControl4_2);
+
+	m_pMapControl4_2->Refresh(esriViewAll);  
+
+	//	QMessageBox::information(this, tr("Information"),tr("宋蕴"));
+}
+
+
 
 void ImageCut(const char* pszSrcFile, const char* pszDstFile, int iStartX, int iStartY, int iSizeX, int iSizeY,const char* pszFormat)
 {
@@ -936,6 +1319,17 @@ void sy_2::OnClearMapLayer()
 	ui.ptpairsnum->clear();
 	ui.refImageSize->clear();
 	ui.senImageSize->clear();
+	ui.scale->clear();
+	ui.shift_x->clear();
+	ui.shift_y->clear();
+	ui.mse_2->clear();
+	ui.registratetime_2->clear();
+	ui.ptpairsnum_2->clear();
+	ui.refImageSize_2->clear();
+	ui.senImageSize_2->clear();
+	ui.scale_2->clear();
+	ui.shift_x_2->clear();
+	ui.shift_y_2->clear();
 	refImg.clear();
 	senImg.clear();///分别保存用于初次匹配的小图的路径
 	resultImg.clear();
@@ -1032,7 +1426,8 @@ void sy_2::AdBigMapRegistration()
 		//下面两句根据裁剪出的待配准图像中的小图在参考图像中的位置，计算出待配准图像的原图的左上角坐标在参考图像坐标系中的位置（或者说是待配准图像左上角顶点的平移量）
 		bighx = smallhx - senPoint[0].x;
 		bighy = smallhy - senPoint[0].y;
-
+		//将大图平移旋转参数显示在界面上
+	
 		int h1 = abs(bighx) + 0.5;
 		int h2 = abs(bighy) + 0.5;
 		//对大图间的变换矩阵中的平移量进行更新
@@ -1041,6 +1436,28 @@ void sy_2::AdBigMapRegistration()
 		cvmSet(H1,1,2,bighy);
 		t=(double)(cvGetTickCount()-t)/(cvGetTickFrequency()*1000*1000.); ///计时结束
 		//得到变换参数之后，下面就要建立一个新的更大的图，用以存储两个大图配准的结果
+
+		double h11,h12,h21,h22,sfx,sfy,rotate;
+
+		h11 = cvmGet(H1,0,0);
+		h12 = cvmGet(H1,0,1);
+		h21 = cvmGet(H1,1,0);
+		h22 = cvmGet(H1,1,1);
+		sfx = cvSqrt(h11*h11+h21*h21);
+		sfy = cvSqrt(h22*h22+h12*h12);
+		rotate = (180*atan(h21/h11))/3.1415;
+
+		QString sbighx = QString::number(bighx,'g',6);
+		ui.shift_x_2->setText(sbighx);
+		QString sbighy = QString::number(bighy,'g',6);
+		ui.shift_y_2->setText(sbighy);
+		QString iscale1 = QString::number(sfx,'g',6);
+		QString iscale2 = QString::number(sfy,'g',6);
+		QString iscale = iscale1+"/"+iscale2;
+		ui.scale_2->setText(iscale);
+		QString srotate = QString::number(rotate,'g',6);
+		ui.rotate_2->setText(srotate);
+
 
 		//ResultImagePath.push_back(BigMapResult);
 		GDALAllRegister();
@@ -1140,11 +1557,11 @@ void sy_2::AdBigMapRegistration()
 	}
 
 	QString s1 = QString::number(t,'g',6);
-	ui.registratetime->setText(s1);
+	ui.registratetime_2->setText(s1);
 	QString mse2 = QString::number(mese2,'g',6);
-	ui.mse->setText(mse2);
+	ui.mse_2->setText(mse2);
 	QString s2 = QString::number(num2,'g',6);
-	ui.ptpairsnum->setText(s2);
+	ui.ptpairsnum_2->setText(s2);
 	//QString size1 = QString::number(t3,'g',6);
 	//ui.refImageSize->setText(size1);
 	//QString size2 = QString::number(t3,'g',6);
@@ -1552,3 +1969,659 @@ void Cut_Count_Overlap(int ilayer)		//传入的参数ilayer表示是对simage_repath[ilay
 	
 
 }
+
+
+//SURF+降采样算法
+void sy_2::DSurfSpeed()
+{
+
+	//*创建结果图像所在文件夹*//
+	string dir = refImg[0] + "DSURFResultFiles"; ///在参考图像文件夹下创建文件夹，保存小图和大图的配准结果
+	if(_access(dir.c_str(), 0) != -1)  
+	{  
+		cout << "文件夹已存在" <<endl;  
+		//system("pause");
+	}  
+	else  
+	{  
+		cout << "文件夹不存在，创建文件夹" << endl;  
+		_mkdir(dir.c_str()); 
+		//system("pause");
+	} 
+	string dir1 = dir + "/";
+
+	string sImageResultPath = dir1 + "PyramidImageRegResult.jpg";	//降采样图像匹配结果图
+	string BigMapResult = dir1 + "BigMapRegistrationResult.jpg";	//原图匹配结果图
+	resultImg.clear(); 
+	resultImg.push_back(dir1);				//resultImg[0]:结果图像所在文件夹
+	resultImg.push_back(sImageResultPath);	//resultImg[1]：降采样图像配准结果路径
+	resultImg.push_back(BigMapResult);		//resultImg[2]：原图配准结果
+	
+	//若是默认情况，选择1/2降采样的图像进行匹配
+	int i = 1;
+	iLayer1 = i;
+	iLayer2 = iLayer1;
+	string refImage,senImage;	//这三个量分别用于临时存储用以匹配的图像路径，并传递给图像配准的函数
+	int downrate = pow(2.0,i);
+	double t=(double)cvGetTickCount();//开始计时
+	//	double t3=(double)cvGetTickCount();//开始计时
+
+	//如果前面对金字塔层数进行了选择，或者改变，这个函数就需要能够适应这种改变
+	//首先应该对i进行判断，当i=-1时，表明没有金字塔层无需进行裁剪，直接进行匹配，
+	CvMat* H;//现在先不讨论图像大小时的问题，先把大图配准给改进
+	if (i <= 0)
+	{
+		refImage = refImg[1];
+		senImage = senImg[1];
+		//下面进行的是对小图的匹配
+		SURF_ON_TWO(refImage,senImage,sImageResultPath);
+		H = H_2[0];
+	}
+	else
+	{
+
+		refImage = refLayer[iLayer1];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
+		senImage = senLayer[iLayer2];		
+		//
+		//		double t4=(double)cvGetTickCount();//开始计时
+		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		SURF_ON_TWO(refImage,senImage,sImageResultPath);//调取金字塔中像素数小于1000的图像进行匹配
+		H = H_2[0];
+
+		double smallhx,smallhy,ha,hb;///该参数表示两个裁剪出来的小图的平移参数
+		double bighx,bighy;//该参数表示待配准图像相对于参考图像的平移参数
+		//px = cvmGet( H, 0, 2 );
+		//py = cvmGet( H, 1, 2 );
+		smallhx = cvmGet( H, 0, 2 ); //这里算出的是待配准图像中感兴趣区域相对于参考图像的平移距离
+		smallhy = cvmGet( H, 1, 2 );
+		ha = cvmGet(H,2,0);
+		hb = cvmGet(H,2,1);
+		//现在还需要知道 参考图像中的小图相对于大图的位置或者坐标
+		//即参考图像中裁剪出的小图左上角的坐标
+		CvMat *H1; //定义大图之间的变换矩阵，尤其是平移量进行更新
+
+		//下面两句根据裁剪出的待配准图像中的小图在参考图像中的位置，计算出待配准图像的原图的左上角坐标在参考图像坐标系中的位置（或者说是待配准图像左上角顶点的平移量）
+		bighx = smallhx * downrate;
+		bighy = smallhy * downrate;
+		//将大图平移旋转参数显示在界面上
+
+		//int h1 = abs(bighx) + 0.5;
+		//int h2 = abs(bighy) + 0.5;
+		//对大图间的变换矩阵中的平移量进行更新
+		H1 = H;
+		cvmSet(H1,0,2,bighx);
+		cvmSet(H1,1,2,bighy);
+		cvmSet(H1,2,0,ha/downrate);
+		cvmSet(H1,2,1,hb/downrate);
+		t=(double)(cvGetTickCount()-t)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		//得到变换参数之后，下面就要建立一个新的更大的图，用以存储两个大图配准的结果
+
+		double h11,h12,h21,h22,sfx,sfy,rotate;
+
+		h11 = cvmGet(H1,0,0);
+		h12 = cvmGet(H1,0,1);
+		h21 = cvmGet(H1,1,0);
+		h22 = cvmGet(H1,1,1);
+		sfx = cvSqrt(h11*h11+h21*h21);
+		sfy = cvSqrt(h22*h22+h12*h12);
+		rotate = (180*atan(h21/h11))/3.1415;
+
+		IplImage* rImg = cvLoadImage(refImg[1].c_str());
+		IplImage* sImg = cvLoadImage(senImg[1].c_str());
+
+		IplImage* xformed;
+		xformed = cvCreateImage( cvSize( bighx + sImg->width,bighy+sImg->height ), IPL_DEPTH_8U, 3 );
+		cvWarpPerspective( sImg, xformed, H, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll(0) );
+		//透视投影
+		cvSetImageROI(xformed, cvRect( 0, 0, rImg->width, rImg->height ) );
+		cvAddWeighted( rImg, 1, xformed, 0, 0, xformed );
+		//权重函数，参数含义分别是：第一组数组，权值，第二组数组，权值，输出时候添加常数项，输出数组
+		cvResetImageROI( xformed );
+
+		cvSaveImage( resultImg[2].c_str(), xformed );
+
+		//cvShowImage(xformed)
+		cvReleaseImage(&xformed);
+
+	}
+
+	OpenResultFile2(resultImg[2]);
+}
+
+//SURF+降采样+分块算法
+
+void sy_2::FenKuai_DSURF()
+{
+	fenImage.clear();
+	
+	//*创建结果图像所在文件夹*//
+	string dir = refImg[0] + "FenKuaiResultFiles"; ///在参考图像文件夹下创建文件夹，保存小图和大图的配准结果
+	if(_access(dir.c_str(), 0) != -1)  
+	{  
+		cout << "文件夹已存在" <<endl;  
+		//system("pause");
+	}  
+	else  
+	{  
+		cout << "文件夹不存在，创建文件夹" << endl;  
+		_mkdir(dir.c_str()); 
+		//system("pause");
+	} 
+
+	string dir2 = refImg[0] + "FenKuai"; ///在参考图像文件夹下创建文件夹，保存小图和大图的配准结果
+	if(_access(dir2.c_str(), 0) != -1)  
+	{  
+		cout << "文件夹已存在" <<endl;  
+		//system("pause");
+	}  
+	else  
+	{  
+		cout << "文件夹不存在，创建文件夹" << endl;  
+		_mkdir(dir2.c_str()); 
+		//system("pause");
+	} 
+	fenImage.push_back(dir2);//fenImage[0]:分块图像所在文件夹
+	string dir1 = dir + "/";
+
+	string sImageResultPath = dir1 + "PyramidImageRegResult.jpg";	//裁剪图像匹配结果图
+	string BigMapResult = dir1 + "BigMapRegistrationResult.tif";	//大图匹配结果图
+	resultImg.clear(); 
+	resultImg.push_back(dir1);				//resultImg[0]:结果图像所在文件夹
+	resultImg.push_back(sImageResultPath);	//resultImg[1]：降采样图像配准结果路径
+	resultImg.push_back(BigMapResult);		//resultImg[2]：大图配准结果
+	//若是默认情况，选择1/2降采样的图像进行匹配
+	int i = 1;
+	iLayer1 = i;
+	iLayer2 = iLayer1;
+	string refImage,senImage;	//这三个量分别用于临时存储用以匹配的图像路径，并传递给图像配准的函数
+
+	double t=(double)cvGetTickCount();//开始计时
+	//	double t3=(double)cvGetTickCount();//开始计时
+
+	//如果前面对金字塔层数进行了选择，或者改变，这个函数就需要能够适应这种改变
+	//首先应该对i进行判断，当i=-1时，表明没有金字塔层无需进行裁剪，直接进行匹配，
+	
+	cv::initModule_nonfree();
+	CvMat* H;//现在先不讨论图像大小时的问题，先把大图配准给改进
+	CvMat h;
+	CvMat* H1=&h;
+	double a[9];
+	double px,py;
+	double sfx,sfy;
+	double R11,R12,R21,R22,R13,R23,R33;
+	vector<int>ptpairs2;
+	CvMemStorage* storage2=cvCreateMemStorage(0);
+	static CvScalar colors1[] = 
+	{
+		{{0,0,255}},
+		{{0,128,255}},
+		{{0,255,255}},
+		{{0,255,0}},
+		{{255,128,0}},
+		{{255,255,0}},
+		{{255,0,0}},
+		{{255,0,255}},
+		{{255,255,255}}
+	};//建立类似于调色版的东西
+	CvSURFParams params11 = cvSURFParams(1000, 0);
+
+
+	if (i <= 0)
+	{
+		refImage = refImg[1];
+		senImage = senImg[1];
+		//下面进行的是对小图的匹配
+		SURF_ON_TWO(refImage,senImage,sImageResultPath);
+		H = H_2[0];
+		return ;
+	}
+	else
+	{
+
+		refImage = refLayer[iLayer1];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
+		senImage = senLayer[iLayer2];		
+		
+		int iscal = pow(2.0,iLayer1);
+
+		if (refImage == senImage)
+		{
+			QMessageBox::information( 0, "Tips", "Please open another image!", 0, 0 );
+			return;
+		}
+		
+		IplImage* rImg = cvLoadImage(refImg[1].c_str());
+		IplImage* sImg = cvLoadImage(senImg[1].c_str());
+
+
+		int width11 = rImg->width;
+		int height11 = rImg->height;
+		int width12 = sImg->width;
+		int height12 = sImg->height;
+
+		int m,n;   //n行m列
+
+		m=width11/width12;
+		n=height11/height12;
+		if(width11%width12>0.5*width12)
+			m++;
+		if(height11%height12>0.5*height12)
+			n++;
+		if(flag11==1)
+		{
+			m+=flag1;
+			n+=flag1;
+		}
+		if(flag22==1)
+		{
+			m-=flag2;
+			n-=flag2;
+		}
+
+		ww=((double)width11)/((double)m);
+		hh=((double)height11)/((double)n);
+		IplImage* temp;
+		char name[100];
+		char* bb;
+		string fenkuaifilename;
+		temp=cvCreateImage(cvSize(ww,hh) , IPL_DEPTH_8U, 3);
+
+		for(int j=0;j<n;j++)
+		{
+			for(int i=0;i<m;i++)
+			{
+				cvSetImageROI(rImg,cvRect(i*ww,j*hh,ww,hh));
+				cvCopy(rImg,temp);
+				cvResetImageROI(rImg);
+				sprintf(name,"%s\\%d %d.jpg",dir2, j,i);
+				bb=name;
+				fenkuaifilename = name;
+				cvSaveImage(bb,temp);
+				fenImage.push_back(fenkuaifilename);//fenImage[1]及以后保存分成的小块图像路径
+
+			}
+
+		}
+
+		/**********************得到小图像的特征**************************************/
+		extern double	m_ColorPow;
+		extern double	m_CuvePow;
+		extern double	m_ShapePow;
+
+		extern int m_KeyMainColorSig[111]; // 查询小图像的特征
+		extern double m_KeyCuve[15];
+		extern double m_KeyShape[8];
+		extern int m_Color[111];//检索图像特征
+		extern double m_Cuve[15];
+		extern double m_Shape[8];
+	//	const char* strsmall;
+		/**********************得到小图像的特征**************************************/
+		CString strsmall;
+		//strsmall="E:\\fen2\\b1.jpg";//大图的一
+		//fen1path=file_path+"\\fen1";
+		//fen2path=file_path2+"\\fen2";
+		QDir *temp = new QDir;
+		bool exist = temp->exists(senLayer[iLayer2]);
+		if(!exist)
+		{
+			QMessageBox::information(NULL, "Title", "Please cut the images!!!", QMessageBox::Ok, QMessageBox::Ok);
+			return;
+
+		}
+
+
+		//fen2应该是待配准图像
+		QString fen2b1name=QString::fromStdString(fenImage[0])+"\\b1.jpg";
+		const QByteArray textfen2b1 = fen2b1name.toLocal8Bit();
+		const char *fen2nameb1 = textfen2b1.data();
+		strsmall=fen2nameb1;
+
+		CxImage m_imgLoaded;
+		int h0,w0;
+		m_imgLoaded.Load(strsmall);
+		h0=m_imgLoaded.GetHeight();
+		w0=m_imgLoaded.GetWidth();
+
+		IplImage* img1111 = cvLoadImage(strsmall, 1);//小图
+		int k;
+		for(k=0; k<111; k++)
+		{
+			m_KeyMainColorSig[k] = 0;
+		}
+		for(k=0; k<15; k++)
+		{
+			m_KeyCuve[k]=0;
+		}
+		for(k=0;k<8;k++)
+		{
+			m_KeyShape[k]=0;
+		}
+
+		ColorSplit(m_imgLoaded);//转换成HSI空间  颜色
+		CuveSplit(m_imgLoaded);    //转换成梯度   纹理
+		ShapeSplit(m_imgLoaded);   //利用canny求出边缘  形状
+
+		for(k=0;k<111;k++)
+			m_KeyMainColorSig[k] = m_Color[k];
+		for(k=0; k<15; k++)
+		{
+			m_KeyCuve[k]=m_Cuve[k];
+		}
+		for(k=0;k<8;k++)
+		{
+			m_KeyShape[k]=m_Shape[k];
+		}
+		///以上是大图的一个子图B1的特征
+
+		/*********************得到小图像的特征***************************************/
+		/***********************************************************************/
+
+		ColorPow=m_ColorPow;
+		CuvePow=m_CuvePow;
+		ShapePow=m_ShapePow;
+		if (ColorPow==0&&CuvePow==0&&ShapePow==0)
+		{
+			ColorPow=1;
+			CuvePow=1;
+			ShapePow=1;
+		}
+		double plus = ColorPow + CuvePow + ShapePow;
+		ColorPow /= plus;
+		CuvePow /= plus;
+		ShapePow /= plus;
+
+		//////////////////////可以改成全局变量
+		QString m_strBeginPath;		//开始路径
+		QString m_strExtension;     //查找文件夹中的文件类型
+		m_strExtension = "*.jpg";
+		//m_strBeginPath = "E:\\fen1";
+		m_strBeginPath =QString::fromStdString(fenImage[0]);
+
+		CariRecursive(m_strBeginPath, m_strExtension);//检索出最相似的
+
+
+
+
+		int number=xishu.size();
+		int minNum=0;
+		double zuixiao;
+		zuixiao=xishu[0];
+		for (int i=0;i<number;i++)////找到最小的系数
+		{
+
+			if(zuixiao>xishu[i])
+			{
+				zuixiao=xishu[i];
+				minNum=i;
+			}			
+
+		}
+
+
+		QString tp;
+		tp=lujing[minNum];
+
+		QString dir_s=tp;
+		const QByteArray text = dir_s.toLocal8Bit();
+		const char *tp1 = text.data();
+
+
+		IplImage* temp1=cvLoadImage(tp1,1);//系数最小相似度最大？
+
+		int len1=strlen(tp1);
+
+		QCharRef aaa=tp[len1-7];
+		QCharRef bbb=tp[len1-5];
+		QChar aaaa(aaa);
+		char aaaaa=aaaa.toAscii();
+		QChar bbbb(bbb);
+		char bbbbb=bbbb.toAscii();
+		int mm=aaaaa-'0';
+		int nn=bbbbb-'0';
+
+		/*cvSetImageROI(img[0], cvRect(nn*ww, mm*hh, ww, hh) );*/
+
+		IplImage* img1=convert_to_gray8(/*img[0]*/temp1);//找到的小图
+		IplImage* img2=convert_to_gray8(img1111);//B1
+
+		CvSeq *PreKeypoints3 = 0, *PreDescriptors3 = 0;
+		CvSeq *CurrentKeypoints3 = 0, *CurrentDescriptors3 = 0;
+
+		////////////////////
+		CvMemStorage* storage2=cvCreateMemStorage(0);
+		CvSURFParams params11 = cvSURFParams(1000, 0);
+
+		img.clear();
+		img[0] = cvLoadImage(refImg[1].c_str());
+		img[1] = cvLoadImage(senImg[1].c_str());
+
+		cvExtractSURF( img1, 0, &PreKeypoints3, &PreDescriptors3, storage2, params11);
+		cvExtractSURF( img2, 0, &CurrentKeypoints3, &CurrentDescriptors3, storage2, params11);
+
+		vector<int>ptpairs2;
+		findPairs3( CurrentKeypoints3, CurrentDescriptors3, PreKeypoints3, PreDescriptors3, ptpairs2 );
+
+
+		num1=ptpairs2.size()/2;
+		H = GetH3(ptpairs2,CurrentKeypoints3,PreKeypoints3);
+
+		//const char* img3path = "E:\\c\\fenkuai.jpg";
+
+		if( H )
+		{
+
+			mese1=GetRMSE3(ptpairs2,CurrentKeypoints3,PreKeypoints3,H);
+			H_1.clear();
+			H_1.push_back(H);
+
+			double ppx,ppy,RR02,RR12,RRa,RRb;
+			ppx=nn*ww;
+			ppy=mm*hh;
+			RR02=cvmGet(H,0,2)+ppx;
+			cvmSet(H,0,2,RR02*iscal);
+			RR12=cvmGet(H,1,2)+ppy;
+			cvmSet(H,1,2,RR12*iscal);
+			RRa = cvmGet(H,2,0);
+			RRb = cvmGet(H,2,1);
+			cvmSet(H,2,0,RRa/iscal);
+			cvmSet(H,2,1,RRb/iscal);
+			cvInitMatHeader(H1,3,3,CV_64FC1,a,CV_AUTOSTEP);
+			cvTranspose(H,H1);
+			Mat H2=H1;
+			
+			R11=cvmGet(H1,0,0);
+			R12=cvmGet(H1,0,1);
+			R21=cvmGet(H1,1,0);
+			R22=cvmGet(H1,1,1);
+			R13=cvmGet(H1,0,2);
+			R23=cvmGet(H1,1,2);
+			R33=cvmGet(H1,2,2);
+			px=cvmGet(H1,2,0);
+			py=cvmGet(H1,2,1);
+			sfx=cvSqrt(R11*R11+R12*R12);
+			sfy=cvSqrt(R21*R21+R22*R22);
+			CvPoint p1,p2,p3,p4; 
+			p2.x=px;  p2.y=py;
+			p1.x=(img[1]->width)*R11+px;  p1.y=R12*(img[1]->width)+py; 
+			p3.x=R21*(img[1]->height)+px; p3.y=R22*(img[1]->height)+py; 
+			p4.x=(img[1]->width)*R11+R21*(img[1]->height)+px; p4.y=R12*(img[1]->width)+R22*(img[1]->height)+py; 
+
+			cvLine(img[0],p1,p2,CV_RGB(255,0,0),2,CV_AA);
+			cvLine(img[0],p2,p3,CV_RGB(255,0,0),2,CV_AA);
+			cvLine(img[0],p3,p4,CV_RGB(255,0,0),2,CV_AA);
+			cvLine(img[0],p4,p1,CV_RGB(255,0,0),2,CV_AA);
+
+			int height;
+			IplImage* imgtemp8;
+			IplImage* object = img[1];
+			IplImage* image = img[0];
+
+			height=object->height>image->height?object->height:image->height;
+			imgtemp8=cvCreateImage(cvSize(object->width+image->width,height) , IPL_DEPTH_8U, 3);
+			cvZero(imgtemp8);
+			cvSetImageROI(imgtemp8, cvRect( 0, 0, object->width, object->height ));
+			cvCopy(object, imgtemp8);
+			cvResetImageROI(imgtemp8);
+			cvSetImageROI(imgtemp8, cvRect( object->width,0, image->width, image->height ) );
+			cvCopy(image,imgtemp8);	
+			cvResetImageROI(imgtemp8);
+
+			for(int k=0;k<ptpairs2.size()/2;k++)
+			{
+				CvPoint p1,p2;
+				CvSURFPoint* pt; 
+				pt=(CvSURFPoint*)cvGetSeqElem(PreKeypoints3,ptpairs2[2*k+1]);
+				p2.x=(int)(pt->pt.x+object->width+ppx);
+				p2.y=(int)(pt->pt.y+ppy);
+
+				pt=(CvSURFPoint*)cvGetSeqElem(CurrentKeypoints3,ptpairs2[2*k]);
+				p1.x=(int)(pt->pt.x);
+				p1.y=(int)(pt->pt.y);
+
+				cvLine(imgtemp8,p1,p2,cvScalar(0,255,0));
+
+			}
+				
+			
+			cvSaveImage(resultImg[1].c_str(),imgtemp8);
+			
+			flag11=0;
+			flag22=0;
+			flag1=0;
+			flag2=0;
+			cvReleaseImage( &temp1 );
+			cvReleaseImage( &img1 );
+			cvReleaseImage( &img2 );
+			cvReleaseImage( &temp );
+		}
+		else
+		{
+		//	MessageBox("快速算法匹配失败！");
+			//t1=0;
+			mese1=0;
+			num1=0;
+			flag11=0;
+			flag22=0;
+			flag1=0;
+			flag2=0;
+			return;
+		}
+
+	}
+	OpenResultFile2(resultImg[1]);
+	
+	cvReleaseMemStorage(&storage2);
+	ptpairs2.clear();
+	xishu.clear();
+	lujing.clear();
+	img.clear();
+	refImg.clear();
+	senImg.clear();
+	refLayer.clear();
+	senLayer.clear();
+	resultImg.clear();
+	//time_vect.clear();
+
+
+}
+
+
+
+void CariRecursive(QString strInitPath, QString strFileName)  //暗号
+{
+	//判断路径是否存在
+	QDir dir(strNameFile);
+	if(!dir.exists())
+	{
+		return;
+	}
+	dir.setFilter(QDir::Files | QDir::NoSymLinks);
+	QFileInfoList list = dir.entryInfoList();
+
+	int file_count = list.count();
+	if(file_count <= 0)
+	{
+		return;
+	}
+
+	QStringList string_list;
+	for(int i=0; i<file_count;i++)
+	{
+		QFileInfo file_info = list.at(i);
+		QString suffix = file_info.suffix();
+		if(QString::compare(suffix, QString("jpg"), Qt::CaseInsensitive) == 0)   
+		{   
+			QString absolute_file_path = file_info.absoluteFilePath();
+			string_list.append(absolute_file_path);
+			Madhosi(absolute_file_path);
+		}
+	}
+
+
+}
+
+
+double Madhosi(QString strNameFile) //获取图像特征值,并比较   暗号
+{
+	QString strTemp;
+	CxImage imageAsli1;
+	/*const size_t strsize=(strNameFile.GetLength()+1)*2; // 宽字符的长度;
+    char* strNameFile1= new char[strsize]; //分配空间;
+    size_t sz=0;
+    wcstombs_s(&sz,strNameFile1,strsize,strNameFile,_TRUNCATE);
+    int atoiato=atoi((const char*)strNameFile1); // 字符串已经由原来的QString 转换成了 const char*/
+	QString dir_s=strNameFile;
+	const QByteArray text = dir_s.toLocal8Bit();
+	const char *strNameFile1 = text.data();
+
+	//imageAsli1.Load(strNameFile1,CXIMAGE_FORMAT_TIF);
+	imageAsli1.Load(strNameFile1);
+
+	double dTemp,dTempColor,dTempCuve,dTempShape;
+	int i;
+	double powCuve[15]={0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05};
+	double powShape[8]={0.2,0.2,0.15,0.15,0.1,0.05,0.05,01};
+	
+	ColorSplit(imageAsli1);
+	CuveSplit(imageAsli1);
+	ShapeSplit(imageAsli1);
+	//
+	//
+	dTempColor = 0.0;
+	dTempCuve=0.0;
+	dTempShape=0.0;
+	double dQueryNum = 0.0;
+	for(i = 0; i < 111; i++ )
+	{
+		dTempColor += max1(m_KeyMainColorSig[i],m_Color[i]);
+		dQueryNum += m_KeyMainColorSig[i];
+	}
+
+	//
+	dTempColor = dQueryNum/dTempColor;
+
+	for(i=0;i<15;i++)
+	{
+		if(m_KeyCuve[i]!=0||m_Cuve[i]!=0)
+			dTempCuve = dTempCuve + powCuve[i]*fabs((m_KeyCuve[i]-m_Cuve[i])/max1(m_KeyCuve[i],m_Cuve[i]));
+	}
+	dTempCuve = 1 -dTempCuve;
+
+	for(i=0;i<8;i++)
+	{
+		if(m_KeyShape[i]!=0&&m_Shape[i]!=0)
+			dTempShape = dTempShape + powShape[i]*fabs((m_KeyShape[i]-m_Shape[i])/(m_KeyShape[i] > m_Shape[i]?m_KeyShape[i]:m_Shape[i]));
+
+	}
+	dTempShape = 1-dTempShape;
+
+	dTemp = dTempColor*ColorPow + dTempCuve*CuvePow + dTempShape*ShapePow;
+	dTemp = 1-dTemp;
+
+	xishu.push_back(dTemp);/////相似性
+	lujing.push_back(strNameFile);///对应的路径
+	return dTemp;
+
+}
+
+
+

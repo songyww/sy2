@@ -21,6 +21,7 @@
 #include <qmessagebox.h>
 #include <qfiledialog.h>
 #include <QTextCodec>///解决qt中文乱码时需要添加的头文件
+#include <QFile> //使用QDir定义时需要
 
 /*****  opencv的头文件  *****/
 #include <opencv2/opencv.hpp>
@@ -54,6 +55,7 @@
 #include "process.h"
 #include "process_with_surf.h"
 
+#include "ximage.h"
 
 class sy_2 : public QMainWindow
 {
@@ -66,7 +68,22 @@ public:
 private:
 	Ui::sy_2Class ui;
 
+private slots:
+	//void open1();
+	bool OpenFile1();
+	bool OpenFile2();
+	bool OpenFile3();
+	bool OpenFile4();
 
+	//void Openbigresult();
+	void OpenResultFile1(string DstImagePath);
+	void BigMapRegistration(); ///大图配准
+	void OnClearMapLayer();//该函数用于清除Map控件中的图像，以便于显示其他图像
+	void AdBigMapRegistration();
+
+	void DSurfSpeed();//降采样+SURF算法
+	void FenKuai_DSURF();//降采样+分块+SURF算法
+	void OpenResultFile2(string DstImagePath);
 public:
 	//用于图像配准的三个Map控件变量
 	IMapControl3Ptr m_pMapControl1;
@@ -83,29 +100,36 @@ public:
 
 	ITOCControlPtr m_pTOCControl1;
 	ITOCControlPtr m_pTOCControl2;
+	ITOCControlPtr m_pTOCControl4;
+	//用于图像配准的三个Map控件变量
+	IMapControl3Ptr m_pMapControl1_2;
+	IToolbarControlPtr m_pToolbarControl1_2;
 
+	IMapControl3Ptr m_pMapControl2_2;
+	IToolbarControlPtr m_pToolbarControl2_2;
+
+	//	IMapControl3Ptr m_pMapControl3;
+	//	IToolbarControlPtr m_pToolbarControl3;
+
+	IMapControl3Ptr m_pMapControl4_2;
+	IToolbarControlPtr m_pToolbarControl4_2;
+
+	ITOCControlPtr m_pTOCControl1_2;
+	ITOCControlPtr m_pTOCControl2_2;
+	ITOCControlPtr m_pTOCControl4_2;
 public:
 	//控件工具条设置函数
 	void AddMapToolBarCtr(IToolbarControlPtr pToolbar);//map
 
 
-public slots:
-	void OpenFile1();
-	void OpenFile2();
-	//void Openbigresult();
-	void OpenResultFile1(string DstImagePath);
-	void BigMapRegistration(); ///大图配准
-	void OnClearMapLayer();//该函数用于清除Map控件中的图像，以便于显示其他图像
-	void AdBigMapRegistration();
-	void OnSpeed();//分块搜索算法
-	void OnSurfSpeed();//小图像单纯SURF算法
 private:
 	QAction *openAction1,*openAction2;
 	QAction *SurfAction;
 	QAction *DeleMapLayersAction;
 	QAction *BigMapSURFAction;
-	QAction *SImageSpeed;//分块搜索算法
-	QAction *SImageSurfSpeed;//小图像单纯SURF算法
+	QAction *DSFenKuaiAction;//分块搜索算法
+	QAction *DSurfAction;//小图像单纯SURF算法
+
 
 //	QAction *openBigMapResult;
 
@@ -121,6 +145,7 @@ void ImageCut(const char* pszSrcFile, const char* pszDstFile, int iStartX, int i
 void SURF_ON_TWO(string SrcReImagePath, string SrcSenImagePath, string DstImagePath );
 
 void Find_OverlapArea ( int ilayer );
-
+void CariRecursive(QString strInitPath, QString strFileName);  //暗号
+double Madhosi(QString strNameFile); //获取图像特征值,并比较   暗号
 
 #endif // SY_2_H
