@@ -56,7 +56,8 @@
 #include "xfile.h"
 #include "xiofile.h"
 #include "xmemfile.h"
-#include "ximadef.h"	//<vho> adjust some #define
+#include "ximadef.h"	//<vho> adjust some #define'
+using namespace std;
 
 
 /* see "ximacfg.h" for CxImage configuration options */
@@ -409,8 +410,8 @@ public:
 	bool LoadResource(HRSRC hRes, DWORD imagetype, HMODULE hModule=NULL);
 #endif
 	// For UNICODE support: char -> TCHAR
-	bool Load(const TCHAR* filename, DWORD imagetype=0);
-	//bool Load(const char * filename, DWORD imagetype=0);
+	//bool Load(const TCHAR* filename, DWORD imagetype=0);
+	bool Load(const char * filename, DWORD imagetype=0);
 	bool Decode(FILE * hFile, DWORD imagetype);
 	bool Decode(CxFile * hFile, DWORD imagetype);
 	bool Decode(BYTE * buffer, DWORD size, DWORD imagetype);

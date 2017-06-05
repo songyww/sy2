@@ -67,7 +67,7 @@ public:
 
 	//定义用于读取金字塔某一层的函数，以及读取时的图像块的设置；m:将图像分m次；n表示读取第几层金字塔
 	void ReadPyramidFile(int m, int n, char * filepath);
-
+//	void sReadPyramidFile(int n, char * filepath);
 
 	//保存单个波段的金字塔某一层的图像,m:第m个波段； n:第n层金字塔； filepath:保存金字塔图像路径
 	void SaveSingleBand(int n, char *filepath);//, GDALDataset *pInFile );

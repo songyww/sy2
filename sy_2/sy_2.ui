@@ -86,7 +86,7 @@
      <widget class="QGroupBox" name="groupBox">
       <property name="geometry">
        <rect>
-        <x>790</x>
+        <x>900</x>
         <y>500</y>
         <width>171</width>
         <height>311</height>
@@ -138,7 +138,7 @@
      <widget class="QGroupBox" name="groupBox_2">
       <property name="geometry">
        <rect>
-        <x>1070</x>
+        <x>1180</x>
         <y>500</y>
         <width>181</width>
         <height>311</height>
@@ -190,7 +190,7 @@
      <widget class="QGroupBox" name="groupBox_3">
       <property name="geometry">
        <rect>
-        <x>960</x>
+        <x>1070</x>
         <y>510</y>
         <width>111</width>
         <height>291</height>
@@ -311,8 +311,8 @@
      <widget class="QPushButton" name="pushButton_5">
       <property name="geometry">
        <rect>
-        <x>810</x>
-        <y>820</y>
+        <x>920</x>
+        <y>810</y>
         <width>131</width>
         <height>31</height>
        </rect>
@@ -324,8 +324,8 @@
      <widget class="QPushButton" name="pushButton_6">
       <property name="geometry">
        <rect>
-        <x>1090</x>
-        <y>820</y>
+        <x>1200</x>
+        <y>810</y>
         <width>141</width>
         <height>31</height>
        </rect>
@@ -395,7 +395,7 @@
      <widget class="QGroupBox" name="groupBox_4">
       <property name="geometry">
        <rect>
-        <x>790</x>
+        <x>930</x>
         <y>500</y>
         <width>171</width>
         <height>311</height>
@@ -460,7 +460,7 @@
      <widget class="QGroupBox" name="groupBox_5">
       <property name="geometry">
        <rect>
-        <x>1070</x>
+        <x>1210</x>
         <y>500</y>
         <width>181</width>
         <height>311</height>
@@ -512,7 +512,7 @@
      <widget class="QGroupBox" name="groupBox_6">
       <property name="geometry">
        <rect>
-        <x>960</x>
+        <x>1100</x>
         <y>510</y>
         <width>111</width>
         <height>291</height>
@@ -620,7 +620,7 @@
      <widget class="QPushButton" name="pushButton_7">
       <property name="geometry">
        <rect>
-        <x>810</x>
+        <x>950</x>
         <y>810</y>
         <width>141</width>
         <height>31</height>
@@ -633,7 +633,7 @@
      <widget class="QPushButton" name="pushButton_8">
       <property name="geometry">
        <rect>
-        <x>1090</x>
+        <x>1230</x>
         <y>810</y>
         <width>141</width>
         <height>31</height>
@@ -641,6 +641,49 @@
       </property>
       <property name="text">
        <string>降采样+SURF算法</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox">
+      <property name="geometry">
+       <rect>
+        <x>800</x>
+        <y>610</y>
+        <width>69</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>默认</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1/2</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1/4</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1/8</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_19">
+      <property name="geometry">
+       <rect>
+        <x>733</x>
+        <y>612</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>降采样比例</string>
       </property>
      </widget>
     </widget>

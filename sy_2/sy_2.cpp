@@ -7,8 +7,9 @@
 #include "ximage.h"
 
 //******保存配准时的图像路径*****///
-vector<IplImage*>img;
-
+vector<IplImage*> img;
+vector<IplImage*> rfimg;//用以保存读入的
+vector<IplImage*> snimg;
 //*** 保存初始读入的图像路径 ***//
 vector<string> refImg;
 vector<string> senImg;
@@ -57,20 +58,20 @@ double CuvePow;
 double ShapePow;
 
 //extern 
-double	m_ColorPow;
+ double	m_ColorPow;
 //extern 
-double	m_CuvePow;
+ double	m_CuvePow;
 //extern 
-double	m_ShapePow;
+ double	m_ShapePow;
 vector<double> xishu;
 vector<QString> lujing;
 #define min1(a,b)            (((a) < (b)) ? (a) : (b))
 #define max1(a,b)            (((a) > (b)) ? (a) : (b))
-int m_KeyMainColorSig[111]; // 查询小图像的特征
-double m_KeyCuve[15];
-double m_KeyShape[8];
-int m_Color[111];//检索图像特征
-double m_Cuve[15],m_Shape[8];
+extern int m_KeyMainColorSig[111]; // 查询小图像的特征
+extern double m_KeyCuve[15];
+extern double m_KeyShape[8];
+extern int m_Color[111];//检索图像特征
+extern double m_Cuve[15],m_Shape[8];
 sy_2::sy_2(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
@@ -542,11 +543,11 @@ bool sy_2::OpenFile3()
 		QMessageBox::information(this, tr("Information"),tr("打开图像失败，请选择正确路径！"));
 		return false;
 	}
-
+	//InFile = (GDALDataset*)GDALOpen(InFilePath, GA_ReadOnly);		//将路径中的文件读入到数据集中
 	pyramid3.sCheckPyramid();
 	refLayer.clear();
 	char dir[1024];
-	sprintf(dir,"%s%s",pyramid3.FilePath,"senPyramidLayers");//filepath:金字塔层所在文件夹
+	sprintf(dir,"%s%s",pyramid3.FilePath,"refPyramidLayers");//filepath:金字塔层所在文件夹
 	//判断该文件夹是否存在，若存在，则不用重新建立；若不存在，则创建该文件夹
 	if(_access(dir, 0) != -1)  
 	{  
@@ -561,15 +562,33 @@ bool sy_2::OpenFile3()
 	} 
 	pyramid3.LayerPath = dir;
 	refLayer.push_back(dir);		//refLayer[0]:参考图像金字塔文件夹路径
+	rfimg.clear();
+	IplImage *scr=0;
+	IplImage *dst=0;
+	char rsname[100];
+	char * bb;
 
-	for (int i = 0;i < pyramid3.iOverViewCount; i++)
+	scr = cvLoadImage(refImg[1].c_str(),-1);\
+	rfimg.push_back(scr);
+	CvSize dst_cvsize;
+	double scale;
+	int sOverViewCount = pyramid3.iOverViewCount;//读取总共有多少层金字塔就创建几层降采样图像
+	for (int i = 1; i <= sOverViewCount;i++)
 	{
 
-		char filepath[1024] = "";			//filepath[1024]:用以保存函数返回的金字塔每一层图像路径
-		pyramid3.SaveSingleBand(i,filepath);//,pyramid1.InFile);
-		refLayer.push_back(filepath);	//refLayer[i+1]:参考图像金字塔第i层图像路径；其中refLayer[1]保存第0层(原图像素的1/4 * 1/4)
+		if (scr)
+		{
+			scale = 1.0/pow(2.0,i);
+			dst_cvsize.width=(int)(scr->width*scale);
+			dst_cvsize.height=(int)(scr->height*scale);
+			dst=cvCreateImage(dst_cvsize,scr->depth,scr->nChannels);
+			cvResize(scr,dst,CV_INTER_AREA);
+			sprintf(rsname,"%s%s%d%s",dir,"/1_",i,".jpg");
+			bb=rsname;
+			refLayer.push_back(bb);
+			cvSaveImage(bb,dst);
+		}
 	}
-
 	char rsize[1024];
 	sprintf(rsize,"%d*%d",pyramid3.iWidth,pyramid3.iHeight);
 	QString rsize1 = QString::fromUtf8(rsize);
@@ -657,13 +676,32 @@ bool sy_2::OpenFile4()
 	} 
 	pyramid4.LayerPath = dir;
 	senLayer.push_back(dir);		//refLayer[0]:参考图像金字塔文件夹路径
+	snimg.clear();
+	IplImage *scr=0;
+	IplImage *dst=0;
+	char rsname[100];
+	char * bb;
 
-	for (int i = 0;i < pyramid4.iOverViewCount; i++)
+	scr = cvLoadImage(senImg[1].c_str(),-1);
+	snimg.push_back(scr);
+	CvSize dst_cvsize;
+	double scale;
+	int sOverViewCount = pyramid4.iOverViewCount;//读取总共有多少层金字塔就创建几层降采样图像
+	for (int i = 1; i <= sOverViewCount;i++)
 	{
 
-		char filepath[1024] = "";			//filepath[1024]:用以保存函数返回的金字塔每一层图像路径
-		pyramid4.SaveSingleBand(i,filepath);//,pyramid1.InFile);
-		senLayer.push_back(filepath);	//refLayer[i+1]:参考图像金字塔第i层图像路径；其中refLayer[1]保存第0层(原图像素的1/4 * 1/4)
+		if (scr)
+		{
+			scale = 1.0/pow(2.0,i);
+			dst_cvsize.width=(int)(scr->width*scale);
+			dst_cvsize.height=(int)(scr->height*scale);
+			dst=cvCreateImage(dst_cvsize,scr->depth,scr->nChannels);
+			cvResize(scr,dst,CV_INTER_AREA);
+			sprintf(rsname,"%s%s%d%s",dir,"/1_",i,".jpg");
+			bb=rsname;
+			senLayer.push_back(bb);
+			cvSaveImage(bb,dst);
+		}
 	}
 	char rsize[1024];
 	sprintf(rsize,"%d*%d",pyramid4.iWidth,pyramid4.iHeight);
@@ -1023,25 +1061,25 @@ void SURF_ON_TWO(string SrcReImagePath, string SrcSenImagePath, string DstImageP
 			ptpairs_befores = ptpairs;////把经过RANSAC算法之后的内点序列保存为用于挑选的特征点
 			H_2.clear();
 			H_2.push_back(H);
-			double px, py;
-			int h1, h2;
-			px = cvmGet( H, 0, 2 );
-			py = cvmGet( H, 1, 2 );
-			h1 = abs(px) + 0.5;
-			h2 = abs(py) + 0.5;
-			IplImage* xformed;
-			xformed = cvCreateImage( cvSize( h1 + img[1]->width, h2 + img[1]->height ), IPL_DEPTH_8U, 3 );
-			cvWarpPerspective( img[1], xformed, H, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll(0) );
-			//透视投影
-			cvSetImageROI(xformed, cvRect( 0, 0, img[0]->width, img[0]->height ) );
-			cvAddWeighted( img[0], 1, xformed, 0, 0, xformed );
-			//权重函数，参数含义分别是：第一组数组，权值，第二组数组，权值，输出时候添加常数项，输出数组
-			cvResetImageROI( xformed );
-
-			cvSaveImage( DstImagePath.c_str(), xformed );
-
-			//cvShowImage(xformed)
-			cvReleaseImage(&xformed);
+// 			double px, py;
+// 			int h1, h2;
+// 			px = cvmGet( H, 0, 2 );
+// 			py = cvmGet( H, 1, 2 );
+// 			h1 = abs(px) + 0.5;
+// 			h2 = abs(py) + 0.5;
+// 			IplImage* xformed;
+// 			xformed = cvCreateImage( cvSize( h1 + img[1]->width, h2 + img[1]->height ), IPL_DEPTH_8U, 3 );
+// 			cvWarpPerspective( img[1], xformed, H, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll(0) );
+// 			//透视投影
+// 			cvSetImageROI(xformed, cvRect( 0, 0, img[0]->width, img[0]->height ) );
+// 			cvAddWeighted( img[0], 1, xformed, 0, 0, xformed );
+// 			//权重函数，参数含义分别是：第一组数组，权值，第二组数组，权值，输出时候添加常数项，输出数组
+// 			cvResetImageROI( xformed );
+// 
+// 			cvSaveImage( DstImagePath.c_str(), xformed );
+// 
+// 			//cvShowImage(xformed)
+// 			cvReleaseImage(&xformed);
 
 		}
 
@@ -1057,6 +1095,7 @@ void sy_2::OpenResultFile1(string DstImagePath)
 {
 	PyramidBase pyramid1; 
 	pyramid1.InFilePath = DstImagePath.c_str(); 
+	pyramid1.InFile = (GDALDataset*)GDALOpen(pyramid1.InFilePath, GA_ReadOnly);		//将路径中的文件读入到数据集中
 	//pyramid1.FilePath = resultImg[0].c_str();
 	pyramid1.CheckPyramid();
 
@@ -2020,6 +2059,7 @@ void sy_2::DSurfSpeed()
 	else
 	{
 
+
 		refImage = refLayer[iLayer1];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
 		senImage = senLayer[iLayer2];		
 		//
@@ -2065,27 +2105,54 @@ void sy_2::DSurfSpeed()
 		sfx = cvSqrt(h11*h11+h21*h21);
 		sfy = cvSqrt(h22*h22+h12*h12);
 		rotate = (180*atan(h21/h11))/3.1415;
+		CvPoint p1,p2,p3,p4; 
+		p2.x=bighx;  p2.y=bighy;
 
-		IplImage* rImg = cvLoadImage(refImg[1].c_str());
-		IplImage* sImg = cvLoadImage(senImg[1].c_str());
+		p1.x=(snimg[0]->width)*h11+bighx;  p1.y=h21*(snimg[0]->width)+bighy; 
+		p3.x=h12*(snimg[0]->height)+bighx; p3.y=h22*(snimg[0]->height)+bighy; 
+		p4.x=(snimg[0]->width)*h11+h12*(snimg[0]->height)+bighx; p4.y=h21*(snimg[0]->width)+h22*(snimg[0]->height)+bighy; 
 
-		IplImage* xformed;
-		xformed = cvCreateImage( cvSize( bighx + sImg->width,bighy+sImg->height ), IPL_DEPTH_8U, 3 );
-		cvWarpPerspective( sImg, xformed, H, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll(0) );
-		//透视投影
-		cvSetImageROI(xformed, cvRect( 0, 0, rImg->width, rImg->height ) );
-		cvAddWeighted( rImg, 1, xformed, 0, 0, xformed );
-		//权重函数，参数含义分别是：第一组数组，权值，第二组数组，权值，输出时候添加常数项，输出数组
-		cvResetImageROI( xformed );
+		cvLine(rfimg[0],p1,p2,CV_RGB(255,0,0),2,CV_AA);
+		cvLine(rfimg[0],p2,p3,CV_RGB(255,0,0),2,CV_AA);
+		cvLine(rfimg[0],p3,p4,CV_RGB(255,0,0),2,CV_AA);
+		cvLine(rfimg[0],p4,p1,CV_RGB(255,0,0),2,CV_AA);
 
-		cvSaveImage( resultImg[2].c_str(), xformed );
-
-		//cvShowImage(xformed)
-		cvReleaseImage(&xformed);
+// 
+// 		IplImage* rImg = cvLoadImage(refImg[1].c_str());
+// 		IplImage* sImg = cvLoadImage(senImg[1].c_str());
+// 
+// 		IplImage* xformed;
+// 		xformed = cvCreateImage( cvSize( bighx + sImg->width,bighy+sImg->height ), IPL_DEPTH_8U, 3 );
+// 		cvWarpPerspective( sImg, xformed, H, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll(0) );
+// 		//透视投影
+// 		cvSetImageROI(xformed, cvRect( 0, 0, rImg->width, rImg->height ) );
+// 		cvAddWeighted( rImg, 1, xformed, 0, 0, xformed );
+// 		//权重函数，参数含义分别是：第一组数组，权值，第二组数组，权值，输出时候添加常数项，输出数组
+// 		cvResetImageROI( xformed );
+// 
+ 		cvSaveImage( resultImg[2].c_str(), rfimg[0] );
+// 
+// 		//cvShowImage(xformed)
+// 		cvReleaseImage(&xformed);
 
 	}
 
 	OpenResultFile2(resultImg[2]);
+	//cvReleaseMemStorage(&storage2);
+	//ptpairs.clear();
+	xishu.clear();
+	lujing.clear();
+	img.clear();
+	refImg.clear();
+	senImg.clear();
+	refLayer.clear();
+	senLayer.clear();
+	resultImg.clear();
+	rfimg.clear();
+	snimg.clear();
+
+
+	
 }
 
 //SURF+降采样+分块算法
@@ -2259,14 +2326,14 @@ void sy_2::FenKuai_DSURF()
 		//strsmall="E:\\fen2\\b1.jpg";//大图的一
 		//fen1path=file_path+"\\fen1";
 		//fen2path=file_path2+"\\fen2";
-		QDir *temp = new QDir;
-		bool exist = temp->exists(senLayer[iLayer2]);
-		if(!exist)
-		{
-			QMessageBox::information(NULL, "Title", "Please cut the images!!!", QMessageBox::Ok, QMessageBox::Ok);
-			return;
-
-		}
+// 		QDir *temmp = new QDir;
+// 		bool exist = temmp->exists(senLayer[iLayer2]);
+// 		if(!exist)
+// 		{
+// 			QMessageBox::information(NULL, "Title", "Please cut the images!!!", QMessageBox::Ok, QMessageBox::Ok);
+// 			return;
+// 
+// 		}
 
 
 		//fen2应该是待配准图像
@@ -2277,11 +2344,11 @@ void sy_2::FenKuai_DSURF()
 
 		CxImage m_imgLoaded;
 		int h0,w0;
-		m_imgLoaded.Load(strsmall);
+		m_imgLoaded.Load(fen2nameb1);
 		h0=m_imgLoaded.GetHeight();
 		w0=m_imgLoaded.GetWidth();
 
-		IplImage* img1111 = cvLoadImage(strsmall, 1);//小图
+		IplImage* img1111 = cvLoadImage(fen2nameb1, 1);//小图
 		int k;
 		for(k=0; k<111; k++)
 		{
@@ -2529,7 +2596,7 @@ void sy_2::FenKuai_DSURF()
 void CariRecursive(QString strInitPath, QString strFileName)  //暗号
 {
 	//判断路径是否存在
-	QDir dir(strNameFile);
+	QDir dir(strInitPath);
 	if(!dir.exists())
 	{
 		return;

@@ -283,6 +283,50 @@ void PyramidBase::ReadPyramidFile(int m, int n,  char * filepath)
 }
 
 
+////定义用于读取金字塔某一层的函数，以及读取时的图像块的设置；m:将图像分m次；n表示读取第几层金字塔
+//void PyramidBase::sReadPyramidFile( int n,  char * filepath)
+//{
+//	GDALAllRegister();
+//	//下面获取指定格式的驱动，用于创建指定格式的图像,InFormat为前面已经获取的输入图像的驱动名称
+//	GDALDriver *poDriver = GetGDALDriverManager()->GetDriverByName("MEM");
+//
+//	/*
+//	 *	@brief 设置输出文件的路径、投影信息、以及变换参数
+//	 */
+//	
+//	sprintf(filepath,"%s%s%%s%d%s",FilePath,"//","1_",n,".jpg");
+//	const char* OutFilepath = filepath;
+//	//PyramidLayer_Path[n] = filepath;	//将金字塔第n层图像路径传递给金字塔类中的保存金字塔层图像路径的成员变量，
+//	
+//	InPyramidBand = InRasterBand->GetOverview(n);			//InPyramidBand中存放输入图像第一个波段第n层金字塔；需要进行初始化
+//	GDALDataset* OutFile = poDriver->Create(OutFilepath, InPyramidBand->GetXSize(),InPyramidBand->GetYSize(),iBandCount, GDT_Byte, NULL ) ;
+//	
+//	//分波段，分块读取文件
+//	int  nXBlockSize, nYBlockSize;//nXBlocks |nYBlocks ：XY反向分块的数目；nXBlockSize, nYBlockSize：分的块在xy方向上的大小
+//	int iXBlock, iYBlock;
+//	GByte *pabyData;//根据分的块的大小为该缓存分配相应的空间
+//
+//
+//	for ( int i = 1; i <= iBandCount; i++ )
+//	{
+//		InPyramidBand = InFile->GetRasterBand(i)->GetOverview(n);	//传入的参数n为读取那一层金字塔
+//		GDALRasterBand* OutBand = OutFile->GetRasterBand(i);
+//		iOverViewCount = InFile->GetRasterBand(i)->GetOverviewCount();
+//		CPLAssert( InPyramidBand->GetRasterDataType()  ==  GDT_Byte);
+//		nYBlockSize = InPyramidBand->GetYSize() ;
+//		nXBlockSize = InPyramidBand->GetXSize() ;
+//		pabyData = (GByte *)CPLMalloc( nXBlockSize * nYBlockSize );
+//
+//				InPyramidBand->RasterIO(GF_Read,0,0,nXBlockSize,nYBlockSize,pabyData,nXBlockSize, nYBlockSize, GDT_Byte, 0,0);
+//
+//				OutBand->RasterIO(GF_Write,0,0,nXBlockSize,nYBlockSize,pabyData,nXBlockSize,nYBlockSize, GDT_Byte,0,0);
+//	}		
+//
+//}
+//
+
+
+
 //保存单个波段的金字塔某一层的图像,； n:第n层金字塔； filepath:保存金字塔图像路径
 void PyramidBase::SaveSingleBand(int n, char *filepath)//,GDALDataset *pInFile)
 {
