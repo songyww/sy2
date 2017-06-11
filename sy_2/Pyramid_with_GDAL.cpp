@@ -132,28 +132,28 @@ bool PyramidBase::sCheckPyramid()
 	iCurNum = iPixelNum;
 	iOverViewCount = InRasterBand->GetOverviewCount();
 	//下面判断文件中是否含有金字塔,如果不含有金字塔，则iOverViewCount=0
-	if ( iOverViewCount == 0 )	//表明不含有金字塔，则返回信息；
-	{
-		printf("图像没有创建金字塔文件，请创建金字塔！");
+// 	if ( iOverViewCount == 0 )	//表明不含有金字塔，则返回信息；
+// 	{
+		//printf("图像没有创建金字塔文件，请创建金字塔！");
 		sCreatePyramid();
 		InRasterBand = InFile->GetRasterBand(1);
 		iOverViewCount = InRasterBand->GetOverviewCount();
 		return FALSE;
-
-	}
-	else
-	{
-		printf("图像已经创建金字塔！");
-		return TRUE;
-	}
+// 
+// 	}
+// 	else
+// 	{
+// 		printf("图像已经创建金字塔！");
+// 		return TRUE;
+// 	}
 }
 
 bool PyramidBase::sCreatePyramid()
 {
 	//////////////////////////////////////////////////////////////////////////
 	////该方法创建的金字塔，第[0]层金字塔图像x和y 方向的大小分别是原图的4分之1，从第[1]层开始往后的金字塔图像是上一层图像x和y 的2分之1
-	iTopNum = 4096;		//顶层金字塔大小，64*64
-	//iTopNum = 16384;		//顶层金字塔大小，128*128
+	//iTopNum = 4096;		//顶层金字塔大小，64*64
+	iTopNum = 16384;		//顶层金字塔大小，128*128
 	//iTopNum = 65536;		//顶层金字塔大小，256*256
 	//iTopNum = 262144;		//顶层金字塔大小，512*512
 	int anLevels[1024] ={ 0 };//金字塔级别列表，数字表示当前金字塔层中图像大小为原图的N分之一

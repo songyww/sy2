@@ -643,8 +643,6 @@ public:
         pushButton_8->setText(QApplication::translate("sy_2Class", "\351\231\215\351\207\207\346\240\267+SURF\347\256\227\346\263\225", 0, QApplication::UnicodeUTF8));
         comboBox->clear();
         comboBox->insertItems(0, QStringList()
-         << QApplication::translate("sy_2Class", "\351\273\230\350\256\244", 0, QApplication::UnicodeUTF8)
-         << QApplication::translate("sy_2Class", "1/2", 0, QApplication::UnicodeUTF8)
          << QApplication::translate("sy_2Class", "1/4", 0, QApplication::UnicodeUTF8)
          << QApplication::translate("sy_2Class", "1/8", 0, QApplication::UnicodeUTF8)
         );

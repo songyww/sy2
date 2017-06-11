@@ -84,6 +84,8 @@ private slots:
 	void DSurfSpeed();//降采样+SURF算法
 	void FenKuai_DSURF();//降采样+分块+SURF算法
 	void OpenResultFile2(string DstImagePath);
+	void on_down_rate(const QString &text);
+	//void on_click_down();
 public:
 	//用于图像配准的三个Map控件变量
 	IMapControl3Ptr m_pMapControl1;
@@ -147,5 +149,6 @@ void SURF_ON_TWO(string SrcReImagePath, string SrcSenImagePath, string DstImageP
 void Find_OverlapArea ( int ilayer );
 void CariRecursive(QString strInitPath, QString strFileName);  //暗号
 double Madhosi(QString strNameFile); //获取图像特征值,并比较   暗号
+void ResizeImage( const char* scrimg,const char* dstimg, double scale );//对原始图像进行降采样；scale 为降采样比例，降采样后尺寸/原图尺寸
 
 #endif // SY_2_H

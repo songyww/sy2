@@ -22,7 +22,7 @@ static const uint qt_meta_data_sy_2[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+      12,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -41,6 +41,7 @@ static const uint qt_meta_data_sy_2[] = {
      158,    5,    5,    5, 0x08,
      171,    5,    5,    5, 0x08,
      187,   59,    5,    5, 0x08,
+     216,  211,    5,    5, 0x08,
 
        0        // eod
 };
@@ -51,7 +52,8 @@ static const char qt_meta_stringdata_sy_2[] = {
     "OpenResultFile1(string)\0BigMapRegistration()\0"
     "OnClearMapLayer()\0AdBigMapRegistration()\0"
     "DSurfSpeed()\0FenKuai_DSURF()\0"
-    "OpenResultFile2(string)\0"
+    "OpenResultFile2(string)\0text\0"
+    "on_down_rate(QString)\0"
 };
 
 void sy_2::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -75,6 +77,7 @@ void sy_2::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void *
         case 8: _t->DSurfSpeed(); break;
         case 9: _t->FenKuai_DSURF(); break;
         case 10: _t->OpenResultFile2((*reinterpret_cast< string(*)>(_a[1]))); break;
+        case 11: _t->on_down_rate((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -112,9 +115,9 @@ int sy_2::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 11)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 12;
     }
     return _id;
 }

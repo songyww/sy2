@@ -654,16 +654,6 @@
       </property>
       <item>
        <property name="text">
-        <string>默认</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>1/2</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
         <string>1/4</string>
        </property>
       </item>
