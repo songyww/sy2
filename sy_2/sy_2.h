@@ -145,7 +145,7 @@ void ImageCut(const char* pszSrcFile, const char* pszDstFile, int iStartX, int i
 //void BigMapRegistration(); ///大图配准
 
 void SURF_ON_TWO(string SrcReImagePath, string SrcSenImagePath, string DstImagePath );
-
+void SURF_ON_TWO1(string SrcReImagePath, string SrcSenImagePath, string DstImagePath );
 void Find_OverlapArea ( int ilayer );
 void CariRecursive(QString strInitPath, QString strFileName);  //暗号
 double Madhosi(QString strNameFile); //获取图像特征值,并比较   暗号

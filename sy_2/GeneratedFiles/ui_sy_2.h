@@ -149,7 +149,7 @@ public:
     {
         if (sy_2Class->objectName().isEmpty())
             sy_2Class->setObjectName(QString::fromUtf8("sy_2Class"));
-        sy_2Class->resize(1444, 1020);
+        sy_2Class->resize(1470, 1020);
         action_2 = new QAction(sy_2Class);
         action_2->setObjectName(QString::fromUtf8("action_2"));
         action_3 = new QAction(sy_2Class);
@@ -164,7 +164,7 @@ public:
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         tabWidget = new QTabWidget(centralWidget);
         tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
-        tabWidget->setGeometry(QRect(0, 0, 1431, 951));
+        tabWidget->setGeometry(QRect(20, 0, 1431, 951));
         tab = new QWidget();
         tab->setObjectName(QString::fromUtf8("tab"));
         MapTocCtr1 = new QAxWidget(tab);
@@ -570,7 +570,7 @@ public:
         sy_2Class->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(sy_2Class);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1444, 23));
+        menuBar->setGeometry(QRect(0, 0, 1470, 23));
         menu = new QMenu(menuBar);
         menu->setObjectName(QString::fromUtf8("menu"));
         menu_3 = new QMenu(menu);
