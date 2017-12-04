@@ -2487,7 +2487,8 @@ void sy_2::FenKuai_DSURF()
 		cout << "文件夹不存在，创建文件夹" << endl;  
 		_mkdir(dir.c_str()); 
 	} 
-	string dir2 = refImg[0] + "FenKuai"; ///在参考图像文件夹下创建文件夹，保存小图和大图的配准结果
+	//降采样+分块SURF算法的分块放于 DFenKuai 文件夹下，非降采样放于 FenKuai文件夹下
+	string dir2 = refImg[0] + "DFenKuai"; ///在参考图像文件夹下创建文件夹，保存小图和大图的配准结果
 	if(_access(dir2.c_str(), 0) != -1)   
 		cout << "文件夹已存在" <<endl;  
 	else  
@@ -2867,7 +2868,34 @@ void sy_2::FenKuai_DSURF()
 
 }
 
+//不进行降采样的分块+SURF算法--即将方兰师姐的算法从小图应用到大图中
+    /*想法：对于4000及以下的场景图像，直接利用方兰师姐的算法；
+            但是对于4000以上的大场景图像，可能无法进行分块，需要借助GDAL进行分块裁切*/
+//该函数与 FenKuai_DSURF()函数类似，只是该函数没有对原始图像进行降采样，同时需要利用GDAL而不是Opencv对超大图像进行分块
+//降采样+分块SURF算法的分块放于 DFenKuai 文件夹下，非降采样放于 FenKuai文件夹下
+/*
+ *prime function: 针对超大图像在不进行降采样的情况下使用Opencv进行分块匹配算法遇到的问题进行处理；
+ * function 1:分类裁切。对4000及以上的图像分块采用GDAL裁切分块；4000一下利用Opencv库函数裁切
+ * function 2:搜索匹配。暂时没想到会遇到的问题；
+ * function 3:预测超大图像无法使用Opencv库函数在原始图像上绘制出目标图像的位置---用GDAL的什么函数替代呢？
+*/
+void sy_2::FenKuai_SURF()
+{
+	//设置图像大小全局标记，小于4000，标记为0；大于4000，标记为1；
+	//对图像大小进行检测，如果参考图像大小小于4000，则采用Opencv裁剪分块的方式进行分块匹配
+	//如果图像大小大于4000，则采用GDAL分块方式进行分块匹配
 
+
+	//参考图像小于4000，调用Opencv裁剪分块的方法
+
+
+
+	//参考图像大于4000，调用GDAL裁剪分块
+
+
+
+
+}
 
 void CariRecursive(QString strInitPath, QString strFileName)  //暗号
 {

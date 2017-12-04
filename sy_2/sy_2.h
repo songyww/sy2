@@ -83,6 +83,7 @@ private slots:
 
 	void DSurfSpeed();//降采样+SURF算法
 	void FenKuai_DSURF();//降采样+分块+SURF算法
+	void FenKuai_SURF();//分块+SURF算法,不包括降采样的分块算法
 	void OpenResultFile2(string DstImagePath);
 	void on_down_rate(const QString &text);
 	//void on_click_down();
