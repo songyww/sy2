@@ -49,7 +49,7 @@ using namespace std;
 using namespace cv;
 int iLayer1 = 0;
 int iLayer2 = 0;
-double downScale_qt = 1.0/4  ;//qt界面降采样比例设置，若未选择，则默认为1/4降采样
+double downScale_qt = 1  ;//qt界面降采样比例设置，若未选择，则默认为不降采样
 
 
 static int flag1=0,flag2=0;
@@ -244,11 +244,16 @@ sy_2::~sy_2()
 
 void sy_2::on_down_rate(const QString &text)
 {
-	QString str,f1,f2;
+	QString str,f1,f2,f0;
 	str = "Your downsample rate is " + text;
 	QMessageBox::information(this,tr("Info"),str);
+	f0 = "1";
 	f1 = "1/4";
 	f2 = "1/8";
+	if (QString::compare(text,f0)==0)
+	{
+		downScale_qt = 1;
+	}
 	if (QString::compare(text,f1)==0)
 	{
 		downScale_qt = 0.25;
@@ -2369,27 +2374,37 @@ void sy_2::DSurfSpeed()
 	//{  
 		//cout << "文件夹不存在，创建文件夹" << endl;  
 	remove_directory(dir);
-		_mkdir(dir.c_str()); 
+	_mkdir(dir.c_str()); 
 		//system("pause");
 	//} 
 	string dir1 = dir + "/";
 
-	string sImageResultPath = dir1 + "PyramidImageRegResult.jpg";	//降采样图像匹配结果图
-	string BigMapResult = dir1 + "BigMapRegistrationResult.jpg";	//原图匹配结果图
-	resultImg.clear(); 
-	resultImg.push_back(dir1);				//resultImg[0]:结果图像所在文件夹
-	resultImg.push_back(sImageResultPath);	//resultImg[1]：降采样图像配准结果路径
-	resultImg.push_back(BigMapResult);		//resultImg[2]：原图配准结果
-	
-	//若是默认情况，选择1/4降采样的图像进行匹配
-	int i = (1/downScale_qt)/4+1;
+
+	std::stringstream stream;
+	std::string downqt;
+	stream << downScale_qt;
+	downqt = stream.str();
+	//string sImageResultPath = dir1 + downqt + "PyramidImageRegResult.jpg";	//降采样图像匹配结果图
+	string BigMapResult = dir1 + downqt + "BigMapRegistrationResult.jpg";	//原图匹配结果图
+	//resultImg.clear(); 
+	//resultImg.push_back(dir1);				//resultImg[0]:结果图像所在文件夹
+	//resultImg.push_back(sImageResultPath);	//resultImg[1]：降采样图像配准结果路径
+	//在定位算法中，并没有进行两次配准，因此不需要保存降采样配准结果，因此resultImg[1]即为最终结果
+	//resultImg.push_back(BigMapResult);		//resultImg[2]：原图配准结果
+	int i;
+	if (downScale_qt == 1)
+	{
+		i = 0;
+	}
+	else
+	{
+		i = (1/downScale_qt)/4+1;
+	}
 	iLayer1 = i;
 	iLayer2 = iLayer1;
+	//若是默认情况，选择不降采样的图像进行匹配
 	string refImage,senImage;	//这三个量分别用于临时存储用以匹配的图像路径，并传递给图像配准的函数
-	
 	double downrate = downScale_qt;//将从qt界面获取的参数/或者默认参数赋给降采样变量，并对两幅原始图像进行降采样
-
-
 
 	double t=(double)cvGetTickCount();//开始计时
 
@@ -2399,125 +2414,117 @@ void sy_2::DSurfSpeed()
 	//如果前面对金字塔层数进行了选择，或者改变，这个函数就需要能够适应这种改变
 	//首先应该对i进行判断，当i=-1时，表明没有金字塔层无需进行裁剪，直接进行匹配，
 	CvMat* H;//现在先不讨论图像大小时的问题，先把大图配准给改进
-	if (i <= 0)
+	if (i <= 0)// 如果i== 0，则是不进行降采样，直接对原图进行配准
 	{
 		refImage = refImg[1];
 		senImage = senImg[1];
-		//下面进行的是对小图的匹配
-		SURF_ON_TWO1(refImage,senImage,sImageResultPath);
-		H = H_2[0];
 	}
 	else
 	{
-
-
 		refImage = refLayer[iLayer1];				//取出倒数第二层图像。因为金字塔顶层图像大小为512*512.
 		senImage = senLayer[iLayer2];		
 		//
 		//		double t4=(double)cvGetTickCount();//开始计时
 		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
-		SURF_ON_TWO1(refImage,senImage,sImageResultPath);//调取金字塔中像素数小于1000的图像进行匹配
-		H = H_2[0];
-
-		double smallhx,smallhy,ha,hb;///该参数表示两个裁剪出来的小图的平移参数
-		double bighx,bighy;//该参数表示待配准图像相对于参考图像的平移参数
-		//px = cvmGet( H, 0, 2 );
-		//py = cvmGet( H, 1, 2 );
-		smallhx = cvmGet( H, 0, 2 ); //这里算出的是待配准图像中感兴趣区域相对于参考图像的平移距离
-		smallhy = cvmGet( H, 1, 2 );
-		ha = cvmGet(H,2,0);
-		hb = cvmGet(H,2,1);
-		//现在还需要知道 参考图像中的小图相对于大图的位置或者坐标
-		//即参考图像中裁剪出的小图左上角的坐标
-		CvMat *H1; //定义大图之间的变换矩阵，尤其是平移量进行更新
-
-		//下面两句根据裁剪出的待配准图像中的小图在参考图像中的位置，计算出待配准图像的原图的左上角坐标在参考图像坐标系中的位置（或者说是待配准图像左上角顶点的平移量）
-		bighx = smallhx / downrate;
-		bighy = smallhy / downrate;
-		//将大图平移旋转参数显示在界面上
-
-		//int h1 = abs(bighx) + 0.5;
-		//int h2 = abs(bighy) + 0.5;
-		//对大图间的变换矩阵中的平移量进行更新
-		H1 = H;
-		cvmSet(H1,0,2,bighx);
-		cvmSet(H1,1,2,bighy);
-		cvmSet(H1,2,0,ha*downrate);
-		cvmSet(H1,2,1,hb*downrate);
-		t=(double)(cvGetTickCount()-t)/(cvGetTickFrequency()*1000*1000.); ///计时结束
-		//得到变换参数之后，下面就要建立一个新的更大的图，用以存储两个大图配准的结果
-
-		double h11,h12,h21,h22,sfx,sfy,rotate;
-
-		h11 = cvmGet(H1,0,0);
-		h12 = cvmGet(H1,0,1);
-		h21 = cvmGet(H1,1,0);
-		h22 = cvmGet(H1,1,1);
-		sfx = cvSqrt(h11*h11+h21*h21);
-		sfy = cvSqrt(h22*h22+h12*h12);
-		rotate = (180*atan(h21/h11))/3.1415;
-		CvPoint p1,p2,p3,p4; 
-		p2.x=bighx;  p2.y=bighy;
-
-		p1.x=(snimg[0]->width)*h11+bighx;  p1.y=h21*(snimg[0]->width)+bighy; 
-		p3.x=h12*(snimg[0]->height)+bighx; p3.y=h22*(snimg[0]->height)+bighy; 
-		p4.x=(snimg[0]->width)*h11+h12*(snimg[0]->height)+bighx; p4.y=h21*(snimg[0]->width)+h22*(snimg[0]->height)+bighy; 
-
-		cvLine(rfimg[0],p1,p2,CV_RGB(255,0,0),2,CV_AA);
-		cvLine(rfimg[0],p2,p3,CV_RGB(255,0,0),2,CV_AA);
-		cvLine(rfimg[0],p3,p4,CV_RGB(255,0,0),2,CV_AA);
-		cvLine(rfimg[0],p4,p1,CV_RGB(255,0,0),2,CV_AA);
-// 
-
-
-		////建立新图像
-
-		//IplImage* correspond = cvCreateImage( cvSize(img1->width+img2->width, img1->height), 8, 1 );
-
-
-		////复制新图像
-
-		//cvSetImageROI( correspond, cvRect( 0, 0, img1->width, img1->height ) );
-		//cvCopy( img1, correspond );
-		//cvSetImageROI( correspond, cvRect( img1->width, 0, correspond->width, correspond->height ) );
-		//cvCopy( img2, correspond );
-		//cvResetImageROI( correspond );
-		//cvShowImage( "Object Correspond", correspond );
-
-		////显示匹配结果（直线连接）
-		// for( int i = 0; i < (int)ptpairs1.size(); i += 2 )
-		//  {
-		//      CvSURFPoint* r1 = (CvSURFPoint*)cvGetSeqElem( PreKeypoints1, ptpairs1[i] );
-		//      CvSURFPoint* r2 = (CvSURFPoint*)cvGetSeqElem( CurrentKeypoints1, ptpairs1[i+1] );
-		//      cvLine( correspond, cvPointFrom32f(r1->pt),
-		//	cvPoint(cvRound(r2->pt.x+img1->width), cvRound(r2->pt.y)), colors[8] );
-		//  }    cvShowImage( "Object Correspond", correspond );
-
-
-
- 		QString surftime = QString::number(t,'g',6);
- 		ui.registratetime_4->setText(surftime);
-		QString surfptpairs = QString::number(num2,'g',6);
-		ui.ptpairsnum_4->setText(surfptpairs);
-		QString surfmes = QString::number(mese2,'g',6);
-		ui.mse_4->setText(surfmes);
-
-		QString bigx = QString::number(bighx,'g',6);
-		ui.shift_x_4->setText(bigx);
-		QString bigy = QString::number(bighy,'g',6);
-		ui.shift_y_4->setText(bigy);
-
-		QString surfrotate = QString::number(rotate,'g',6);
-		ui.rotate_4->setText(surfrotate);
-		
-		QString iscale1 = QString::number(sfx,'g',6);
-		QString iscale2 = QString::number(sfy,'g',6);
-		QString iscale = iscale1+"/"+iscale2;
-		ui.scale_4->setText(iscale);
- 		cvSaveImage( resultImg[2].c_str(), rfimg[0] );
+// 		SURF_ON_TWO1(refImage,senImage,BigMapResult);//调取金字塔中像素数小于1000的图像进行匹配
+// 		H = H_2[0];
 	}
 
-	OpenResultFile2(resultImg[2]);
+	SURF_ON_TWO1(refImage,senImage,BigMapResult);
+	H = H_2[0];
+	double smallhx,smallhy,ha,hb;///该参数表示两个裁剪出来的小图的平移参数
+	double bighx,bighy;//该参数表示待配准图像相对于参考图像的平移参数
+	//px = cvmGet( H, 0, 2 );
+	//py = cvmGet( H, 1, 2 );
+	smallhx = cvmGet( H, 0, 2 ); //这里算出的是待配准图像中感兴趣区域相对于参考图像的平移距离
+	smallhy = cvmGet( H, 1, 2 );
+	ha = cvmGet(H,2,0);
+	hb = cvmGet(H,2,1);
+	//现在还需要知道 参考图像中的小图相对于大图的位置或者坐标
+	//即参考图像中裁剪出的小图左上角的坐标
+	CvMat *H1; //定义大图之间的变换矩阵，尤其是平移量进行更新
+
+	//下面两句根据裁剪出的待配准图像中的小图在参考图像中的位置，计算出待配准图像的原图的左上角坐标在参考图像坐标系中的位置（或者说是待配准图像左上角顶点的平移量）
+	bighx = smallhx / downrate;
+	bighy = smallhy / downrate;
+	//将大图平移旋转参数显示在界面上
+
+	//int h1 = abs(bighx) + 0.5;
+	//int h2 = abs(bighy) + 0.5;
+	//对大图间的变换矩阵中的平移量进行更新
+	H1 = H;
+	cvmSet(H1,0,2,bighx);
+	cvmSet(H1,1,2,bighy);
+	cvmSet(H1,2,0,ha*downrate);
+	cvmSet(H1,2,1,hb*downrate);
+	t=(double)(cvGetTickCount()-t)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+	//得到变换参数之后，下面就要建立一个新的更大的图，用以存储两个大图配准的结果
+
+	double h11,h12,h21,h22,sfx,sfy,rotate;
+
+	h11 = cvmGet(H1,0,0);
+	h12 = cvmGet(H1,0,1);
+	h21 = cvmGet(H1,1,0);
+	h22 = cvmGet(H1,1,1);
+	sfx = cvSqrt(h11*h11+h21*h21);
+	sfy = cvSqrt(h22*h22+h12*h12);
+	rotate = (180*atan(h21/h11))/3.1415;
+	CvPoint p1,p2,p3,p4; 
+	p2.x=bighx;  p2.y=bighy;
+
+	p1.x=(snimg[0]->width)*h11+bighx;  p1.y=h21*(snimg[0]->width)+bighy; 
+	p3.x=h12*(snimg[0]->height)+bighx; p3.y=h22*(snimg[0]->height)+bighy; 
+	p4.x=(snimg[0]->width)*h11+h12*(snimg[0]->height)+bighx; p4.y=h21*(snimg[0]->width)+h22*(snimg[0]->height)+bighy; 
+
+	////建立新图像
+	IplImage* correspond = cvCreateImage( cvSize(rfimg[0]->width, rfimg[0]->height), 8, 3 );
+	////复制新图像
+	cvSetImageROI( correspond, cvRect( 0, 0, rfimg[0]->width, rfimg[0]->height ) );
+	cvCopy( rfimg[0], correspond );
+	//cvSetImageROI( correspond, cvRect( img1->width, 0, correspond->width, correspond->height ) );
+	//cvCopy( img2, correspond );
+	cvResetImageROI( correspond );
+	//cvSaveImage(resultImg[2].c_str(),correspond);
+	//cvShowImage( "Object Correspond", correspond );
+
+	cvLine(correspond,p1,p2,CV_RGB(255,0,0),2,CV_AA);
+	cvLine(correspond,p2,p3,CV_RGB(255,0,0),2,CV_AA);
+	cvLine(correspond,p3,p4,CV_RGB(255,0,0),2,CV_AA);
+	cvLine(correspond,p4,p1,CV_RGB(255,0,0),2,CV_AA);
+	cvSaveImage(BigMapResult.c_str(),correspond);
+	cvShowImage( "Object Correspond", correspond );
+
+	////显示匹配结果（直线连接）
+	// for( int i = 0; i < (int)ptpairs1.size(); i += 2 )
+	//  {
+	//      CvSURFPoint* r1 = (CvSURFPoint*)cvGetSeqElem( PreKeypoints1, ptpairs1[i] );
+	//      CvSURFPoint* r2 = (CvSURFPoint*)cvGetSeqElem( CurrentKeypoints1, ptpairs1[i+1] );
+	//      cvLine( correspond, cvPointFrom32f(r1->pt),
+	//	cvPoint(cvRound(r2->pt.x+img1->width), cvRound(r2->pt.y)), colors[8] );
+	//  }    cvShowImage( "Object Correspond", correspond );
+
+ 	QString surftime = QString::number(t,'g',6);
+ 	ui.registratetime_4->setText(surftime);
+	QString surfptpairs = QString::number(num2,'g',6);
+	ui.ptpairsnum_4->setText(surfptpairs);
+	QString surfmes = QString::number(mese2,'g',6);
+	ui.mse_4->setText(surfmes);
+
+	QString bigx = QString::number(bighx,'g',6);
+	ui.shift_x_4->setText(bigx);
+	QString bigy = QString::number(bighy,'g',6);
+	ui.shift_y_4->setText(bigy);
+
+	QString surfrotate = QString::number(rotate,'g',6);
+	ui.rotate_4->setText(surfrotate);
+		
+	QString iscale1 = QString::number(sfx,'g',6);
+	QString iscale2 = QString::number(sfy,'g',6);
+	QString iscale = iscale1+"/"+iscale2;
+	ui.scale_4->setText(iscale);
+ 	//cvSaveImage( resultImg[2].c_str(), rfimg[0] );
+	
+	OpenResultFile2(BigMapResult);
 	xishu.clear();
 	lujing.clear();
 }
@@ -2869,28 +2876,36 @@ void sy_2::FenKuai_DSURF()
 		p3.x=R21*(snimg[0]->height)/downrate+bighx; p3.y=R22*(snimg[0]->height)/downrate+bighy; 
 		p4.x=(snimg[0]->width)*R11/downrate+R21*(snimg[0]->height)/downrate+bighx;
 		p4.y=R12*(snimg[0]->width)/downrate+R22*(snimg[0]->height)/downrate+bighy; 
-
+		/*
 		cvLine(rfimg[0],p1,p2,CV_RGB(255,0,0),2,CV_AA);
 		cvLine(rfimg[0],p2,p3,CV_RGB(255,0,0),2,CV_AA);
 		cvLine(rfimg[0],p3,p4,CV_RGB(255,0,0),2,CV_AA);
 		cvLine(rfimg[0],p4,p1,CV_RGB(255,0,0),2,CV_AA);
-		
+
 		cvSaveImage( resultImg[2].c_str(), rfimg[0] );
-		// 
+		*/// 
 
 		////建立新图像
 
-		//IplImage* correspond = cvCreateImage( cvSize(img1->width+img2->width, img1->height), 8, 1 );
+		IplImage* correspond = cvCreateImage( cvSize(rfimg[0]->width, rfimg[0]->height), 8, 3 );
 
 
 		////复制新图像
 
-		//cvSetImageROI( correspond, cvRect( 0, 0, img1->width, img1->height ) );
-		//cvCopy( img1, correspond );
+		cvSetImageROI( correspond, cvRect( 0, 0, rfimg[0]->width, rfimg[0]->height ) );
+		cvCopy( rfimg[0], correspond );
 		//cvSetImageROI( correspond, cvRect( img1->width, 0, correspond->width, correspond->height ) );
 		//cvCopy( img2, correspond );
 		//cvResetImageROI( correspond );
 		//cvShowImage( "Object Correspond", correspond );
+
+		cvLine(correspond,p1,p2,CV_RGB(255,0,0),2,CV_AA);
+		cvLine(correspond,p2,p3,CV_RGB(255,0,0),2,CV_AA);
+		cvLine(correspond,p3,p4,CV_RGB(255,0,0),2,CV_AA);
+		cvLine(correspond,p4,p1,CV_RGB(255,0,0),2,CV_AA);
+
+		cvSaveImage( resultImg[2].c_str(), correspond );
+		cvShowImage( "Object Correspond", correspond );
 
 		////显示匹配结果（直线连接）
 		// for( int i = 0; i < (int)ptpairs1.size(); i += 2 )
