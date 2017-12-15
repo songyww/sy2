@@ -658,7 +658,7 @@ bool sy_2::OpenFile3()
 	char rsize[1024];
 	sprintf(rsize,"%d*%d",pyramid3.iWidth,pyramid3.iHeight);
 	QString rsize1 = QString::fromUtf8(rsize);
-	ui.refImageSize_3->setText(rsize1);
+	//ui.refImageSize_3->setText(rsize1);
 	ui.refImageSize_4->setText(rsize1);
 
 	refLayer.clear();
@@ -824,7 +824,7 @@ bool sy_2::OpenFile4()
 	char rsize[1024];
 	sprintf(rsize,"%d*%d",pyramid4.iWidth,pyramid4.iHeight);
 	QString rsize2 = QString::fromUtf8(rsize);
-	ui.senImageSize_3->setText(rsize2);
+	//ui.senImageSize_3->setText(rsize2);
 	ui.senImageSize_4->setText(rsize2);
 
 	senLayer.clear();
@@ -1696,26 +1696,26 @@ void sy_2::OnClearMapLayer()
 	ui.rotate->clear();
 	ui.rotate_2->clear();
 	
-	ui.mse_3->clear();
-	ui.registratetime_3->clear();
-	ui.ptpairsnum_3->clear();
-	ui.refImageSize_3->clear();
-	ui.senImageSize_3->clear();
-	ui.scale_3->clear();
-	ui.shift_x_3->clear();
-	ui.shift_y_3->clear();
-	ui.rotate_3->clear();
+// 	ui.mse_3->clear();
+// 	ui.registratetime_3->clear();
+// 	ui.ptpairsnum_3->clear();
+// 	ui.refImageSize_3->clear();
+// 	ui.senImageSize_3->clear();
+// 	ui.scale_3->clear();
+// 	ui.shift_x_3->clear();
+// 	ui.shift_y_3->clear();
+// 	ui.rotate_3->clear();
 
-	ui.mse_4->clear();
-	ui.registratetime_4->clear();
-	ui.ptpairsnum_4->clear();
-	ui.refImageSize_4->clear();
-	ui.senImageSize_4->clear();
-	ui.scale_4->clear();
-	ui.shift_x_4->clear();
-	ui.shift_y_4->clear();
-	ui.rotate_4->clear();
-
+// 	ui.mse_4->clear();
+// 	ui.registratetime_4->clear();
+// 	ui.ptpairsnum_4->clear();
+// 	ui.refImageSize_4->clear();
+// 	ui.senImageSize_4->clear();
+// 	ui.scale_4->clear();
+// 	ui.shift_x_4->clear();
+// 	ui.shift_y_4->clear();
+// 	ui.rotate_4->clear();
+	ui.tableWidget->clearContents();
 	rfimg.clear();
 	snimg.clear();
 	refImg.clear();
@@ -2492,7 +2492,7 @@ void sy_2::DSurfSpeed()
 	cvLine(correspond,p3,p4,CV_RGB(255,0,0),2,CV_AA);
 	cvLine(correspond,p4,p1,CV_RGB(255,0,0),2,CV_AA);
 	cvSaveImage(BigMapResult.c_str(),correspond);
-	cvShowImage( "Object Correspond", correspond );
+//	cvShowImage( "Object Correspond", correspond );
 
 	////显示匹配结果（直线连接）
 	// for( int i = 0; i < (int)ptpairs1.size(); i += 2 )
@@ -2503,25 +2503,96 @@ void sy_2::DSurfSpeed()
 	//	cvPoint(cvRound(r2->pt.x+img1->width), cvRound(r2->pt.y)), colors[8] );
 	//  }    cvShowImage( "Object Correspond", correspond );
 
- 	QString surftime = QString::number(t,'g',6);
- 	ui.registratetime_4->setText(surftime);
+
+	QString surftime = QString::number(t,'g',6);
+	//ui.registratetime_4->setText(surftime);
 	QString surfptpairs = QString::number(num2,'g',6);
-	ui.ptpairsnum_4->setText(surfptpairs);
+	//ui.ptpairsnum_4->setText(surfptpairs);
 	QString surfmes = QString::number(mese2,'g',6);
-	ui.mse_4->setText(surfmes);
+	//ui.mse_4->setText(surfmes);
 
 	QString bigx = QString::number(bighx,'g',6);
-	ui.shift_x_4->setText(bigx);
+	//ui.shift_x_4->setText(bigx);
 	QString bigy = QString::number(bighy,'g',6);
-	ui.shift_y_4->setText(bigy);
+	//ui.shift_y_4->setText(bigy);
 
 	QString surfrotate = QString::number(rotate,'g',6);
-	ui.rotate_4->setText(surfrotate);
-		
+	//ui.rotate_4->setText(surfrotate);
+
 	QString iscale1 = QString::number(sfx,'g',6);
 	QString iscale2 = QString::number(sfy,'g',6);
 	QString iscale = iscale1+"/"+iscale2;
-	ui.scale_4->setText(iscale);
+	//ui.scale_4->setText(iscale);
+	QTableWidgetItem *item0,*item1,*item2,*item3,*item4,*item5,*item6;
+	item0 = new QTableWidgetItem;
+	item1 = new QTableWidgetItem;
+	item2 = new QTableWidgetItem;
+	item3 = new QTableWidgetItem;
+	item4 = new QTableWidgetItem;
+	item5 = new QTableWidgetItem;
+	item6 = new QTableWidgetItem;
+	item0->setText(surfptpairs);
+	item1->setText(surftime);
+	item2->setText(surfmes);
+	item3->setText(bigx);
+	item4->setText(bigy);
+	item5->setText(surfrotate);
+	item6->setText(iscale);
+
+	int val = 1/downScale_qt;//将double类型的降采样比例转换为int类型，以便用于switch语句
+	switch (val)
+	{
+	case 1:
+		
+		ui.tableWidget->setItem(0,0,item0);
+		ui.tableWidget->setItem(0,1,item1);
+		ui.tableWidget->setItem(0,2,item2);
+		ui.tableWidget->setItem(0,3,item3);
+		ui.tableWidget->setItem(0,4,item4);
+		ui.tableWidget->setItem(0,5,item5);
+		ui.tableWidget->setItem(0,6,item6);
+
+
+// 		QString txt0 = QString("%1").arg(num2);//匹配点对数
+// 		QString txt1 = QString("%1").arg(t,0,'Q',4);//匹配时间
+// 		QString txt2 = QString("%1").arg(mese2,0,'Q',4);//匹配精度
+// 		QString txt3 = QString("%1").arg(bighx,0,'Q',4);//
+// 		QString txt4 = QString("%1").arg(bighy,0,'Q',4);//
+// 		QString txt5 = QString("%1").arg(num2);//
+
+		break;
+
+	case 4:
+		//QTableWidgetItem *item1_0,*item1_1,*item1_2,*item1_3,*item1_4,*item1_5,*item1_6;
+		ui.tableWidget->setItem(1,0,item0);
+		ui.tableWidget->setItem(1,1,item1);
+		ui.tableWidget->setItem(1,2,item2);
+		ui.tableWidget->setItem(1,3,item3);
+		ui.tableWidget->setItem(1,4,item4);
+		ui.tableWidget->setItem(1,5,item5);
+		ui.tableWidget->setItem(1,6,item6);
+		break;
+
+	case 8:
+		//QTableWidgetItem *item2_0,*item2_1,*item2_2,*item2_3,*item2_4,*item2_5,*item2_6;
+		ui.tableWidget->setItem(2,0,item0);
+		ui.tableWidget->setItem(2,1,item1);
+		ui.tableWidget->setItem(2,2,item2);
+		ui.tableWidget->setItem(2,3,item3);
+		ui.tableWidget->setItem(2,4,item4);
+		ui.tableWidget->setItem(2,5,item5);
+		ui.tableWidget->setItem(2,6,item6);
+		break;
+	default:
+		break;
+
+
+
+	}
+
+
+
+
  	//cvSaveImage( resultImg[2].c_str(), rfimg[0] );
 	
 	OpenResultFile2(BigMapResult);
@@ -2919,24 +2990,24 @@ void sy_2::FenKuai_DSURF()
 
 
 		QString surftime = QString::number(t,'g',6);
-		ui.registratetime_3->setText(surftime);
+		//ui.registratetime_3->setText(surftime);
 		QString surfptpairs = QString::number(num1,'g',6);
-		ui.ptpairsnum_3->setText(surfptpairs);
+		//ui.ptpairsnum_3->setText(surfptpairs);
 		QString surfmes = QString::number(mese1,'g',6);
-		ui.mse_3->setText(surfmes);
+		//ui.mse_3->setText(surfmes);
 
 		QString bigx = QString::number(px,'g',6);
-		ui.shift_x_3->setText(bigx);
+		//ui.shift_x_3->setText(bigx);
 		QString bigy = QString::number(py,'g',6);
-		ui.shift_y_3->setText(bigy);
+		//ui.shift_y_3->setText(bigy);
 
 		QString surfrotate = QString::number(rotate,'g',6);
-		ui.rotate_3->setText(surfrotate);
+		//ui.rotate_3->setText(surfrotate);
 
 		QString iscale1 = QString::number(sfx,'g',6);
 		QString iscale2 = QString::number(sfy,'g',6);
 		QString iscale = iscale1+"/"+iscale2;
-		ui.scale_3->setText(iscale);
+		//ui.scale_3->setText(iscale);
 	
 		flag11=0; 
 

@@ -22,6 +22,8 @@
 #include <qfiledialog.h>
 #include <QTextCodec>///解决qt中文乱码时需要添加的头文件
 #include <QFile> //使用QDir定义时需要
+#include <QTableWidget> //定义表格界面时需要下面两个头文件的支持 
+#include <QTableWidgetItem>//在对表格进行写入时需要该头文件
 
 /*****  opencv的头文件  *****/
 #include <opencv2/opencv.hpp>
