@@ -729,7 +729,8 @@ bool sy_2::OpenFile3()
 		}
 	}
 	
-
+	//cvReleaseImage( &scr );
+	//cvReleaseImage( &dst );
 	  
 	//*第 5 步： 面向用户的人性化提示，为了保证程序稳定性所需要做的工作
 	//稳定性：例如打开文件失败，或者构建金字塔失败
@@ -881,7 +882,8 @@ bool sy_2::OpenFile4()
 			cvSaveImage(bb,dst);
 		}
 	}
-	
+	//cvReleaseImage( &scr );
+	//cvReleaseImage( &dst );
 
 
 	/*Map控件显示参考图像*/
@@ -948,7 +950,7 @@ bool sy_2::OpenFile4()
 		QMessageBox::information(this, tr("Information"),tr(" 请重新打开待配准图像！ "));
 	}
 
-
+	
 	return true;
 }
 
@@ -1699,8 +1701,8 @@ void sy_2::OnClearMapLayer()
 // 	ui.mse_3->clear();
 // 	ui.registratetime_3->clear();
 // 	ui.ptpairsnum_3->clear();
-// 	ui.refImageSize_3->clear();
-// 	ui.senImageSize_3->clear();
+ //	ui.refImageSize_3->clear();
+ //	ui.senImageSize_3->clear();
 // 	ui.scale_3->clear();
 // 	ui.shift_x_3->clear();
 // 	ui.shift_y_3->clear();
@@ -1709,8 +1711,8 @@ void sy_2::OnClearMapLayer()
 // 	ui.mse_4->clear();
 // 	ui.registratetime_4->clear();
 // 	ui.ptpairsnum_4->clear();
-// 	ui.refImageSize_4->clear();
-// 	ui.senImageSize_4->clear();
+ 	ui.refImageSize_4->clear();
+ 	ui.senImageSize_4->clear();
 // 	ui.scale_4->clear();
 // 	ui.shift_x_4->clear();
 // 	ui.shift_y_4->clear();
@@ -2589,6 +2591,7 @@ void sy_2::DSurfSpeed()
 
 
 	}
+	
 
 
 
@@ -2596,6 +2599,9 @@ void sy_2::DSurfSpeed()
  	//cvSaveImage( resultImg[2].c_str(), rfimg[0] );
 	
 	OpenResultFile2(BigMapResult);
+	cvReleaseImage( &correspond );
+	//rfimg.clear();
+	//snimg.clear();
 	xishu.clear();
 	lujing.clear();
 }
@@ -2682,8 +2688,15 @@ void sy_2::FenKuai_DSURF()
 		{{255,255,255}}
 	};//建立类似于调色版的东西
 	CvSURFParams params11 = cvSURFParams(1000, 0);
-
-	int i = (1/downScale_qt)/4+1;
+	int i;
+	if (downScale_qt == 1)
+	{
+		i = 0;
+	}
+	else
+	{
+		i = (1/downScale_qt)/4+1;
+	}
 	iLayer1 = i;
 	iLayer2 = iLayer1;
 	string refImage,senImage;	//这三个量分别用于临时存储用以匹配的图像路径，并传递给图像配准的函数
@@ -2700,8 +2713,24 @@ void sy_2::FenKuai_DSURF()
 // 	
 // 	IplImage* rImg = cvLoadImage(downref.c_str());//对降采样图像进行分块
 // 	IplImage* sImg = cvLoadImage(downsen.c_str());
-	IplImage* rImg = cvLoadImage(refLayer[iLayer1].c_str());//对降采样图像进行分块
-	IplImage* sImg = cvLoadImage(senLayer[iLayer2].c_str());
+	IplImage* rImg,*sImg;
+	if (i <= 0)// 如果i== 0，则是不进行降采样，直接对原图进行配准
+	{
+		rImg = cvLoadImage(refImg[1].c_str());
+		sImg = cvLoadImage(senImg[1].c_str());
+	}
+	else
+	{
+		rImg = cvLoadImage(refLayer[iLayer1].c_str());//对降采样图像进行分块
+		sImg = cvLoadImage(senLayer[iLayer2].c_str());
+		//
+		//		double t4=(double)cvGetTickCount();//开始计时
+		//t4=(double)(cvGetTickCount()-t4)/(cvGetTickFrequency()*1000*1000.); ///计时结束
+		// 		SURF_ON_TWO1(refImage,senImage,BigMapResult);//调取金字塔中像素数小于1000的图像进行匹配
+		// 		H = H_2[0];
+	}
+
+	
 
 
 	int width11 = rImg->width;
@@ -2976,7 +3005,7 @@ void sy_2::FenKuai_DSURF()
 		cvLine(correspond,p4,p1,CV_RGB(255,0,0),2,CV_AA);
 
 		cvSaveImage( resultImg[2].c_str(), correspond );
-		cvShowImage( "Object Correspond", correspond );
+		//cvShowImage( "Object Correspond", correspond );
 
 		////显示匹配结果（直线连接）
 		// for( int i = 0; i < (int)ptpairs1.size(); i += 2 )
@@ -3009,6 +3038,72 @@ void sy_2::FenKuai_DSURF()
 		QString iscale = iscale1+"/"+iscale2;
 		//ui.scale_3->setText(iscale);
 	
+
+		QTableWidgetItem *item0,*item1,*item2,*item3,*item4,*item5,*item6;
+		item0 = new QTableWidgetItem;
+		item1 = new QTableWidgetItem;
+		item2 = new QTableWidgetItem;
+		item3 = new QTableWidgetItem;
+		item4 = new QTableWidgetItem;
+		item5 = new QTableWidgetItem;
+		item6 = new QTableWidgetItem;
+		item0->setText(surfptpairs);
+		item1->setText(surftime);
+		item2->setText(surfmes);
+		item3->setText(bigx);
+		item4->setText(bigy);
+		item5->setText(surfrotate);
+		item6->setText(iscale);
+
+		int val = 1/downScale_qt;//将double类型的降采样比例转换为int类型，以便用于switch语句
+		switch (val)
+		{
+		case 1:
+
+			ui.tableWidget->setItem(3,0,item0);
+			ui.tableWidget->setItem(3,1,item1);
+			ui.tableWidget->setItem(3,2,item2);
+			ui.tableWidget->setItem(3,3,item3);
+			ui.tableWidget->setItem(3,4,item4);
+			ui.tableWidget->setItem(3,5,item5);
+			ui.tableWidget->setItem(3,6,item6);
+
+
+			// 		QString txt0 = QString("%1").arg(num2);//匹配点对数
+			// 		QString txt1 = QString("%1").arg(t,0,'Q',4);//匹配时间
+			// 		QString txt2 = QString("%1").arg(mese2,0,'Q',4);//匹配精度
+			// 		QString txt3 = QString("%1").arg(bighx,0,'Q',4);//
+			// 		QString txt4 = QString("%1").arg(bighy,0,'Q',4);//
+			// 		QString txt5 = QString("%1").arg(num2);//
+
+			break;
+
+		case 4:
+			//QTableWidgetItem *item1_0,*item1_1,*item1_2,*item1_3,*item1_4,*item1_5,*item1_6;
+			ui.tableWidget->setItem(4,0,item0);
+			ui.tableWidget->setItem(4,1,item1);
+			ui.tableWidget->setItem(4,2,item2);
+			ui.tableWidget->setItem(4,3,item3);
+			ui.tableWidget->setItem(4,4,item4);
+			ui.tableWidget->setItem(4,5,item5);
+			ui.tableWidget->setItem(4,6,item6);
+			break;
+
+		case 8:
+			//QTableWidgetItem *item2_0,*item2_1,*item2_2,*item2_3,*item2_4,*item2_5,*item2_6;
+			ui.tableWidget->setItem(5,0,item0);
+			ui.tableWidget->setItem(5,1,item1);
+			ui.tableWidget->setItem(5,2,item2);
+			ui.tableWidget->setItem(5,3,item3);
+			ui.tableWidget->setItem(5,4,item4);
+			ui.tableWidget->setItem(5,5,item5);
+			ui.tableWidget->setItem(5,6,item6);
+			break;
+		default:
+			break;
+		}
+
+
 		flag11=0; 
 
 		 
@@ -3019,6 +3114,7 @@ void sy_2::FenKuai_DSURF()
 		cvReleaseImage( &img1 );
 		cvReleaseImage( &img2 );
 		cvReleaseImage( &temp );
+		cvReleaseImage( &correspond);
 	}
 	else
 	{
